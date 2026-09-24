@@ -1,3 +1,5 @@
+> [日本語化とコンテナイメージについて](README.ja.md)
+
 <h1 align="center"><a href='https://www.opensignlabs.com'><img src=https://github.com/OpenSignLabs/OpenSign/assets/5486116/e518cc9c-5de3-47da-950b-f93336b9f14e></a>
 </h1><div align="center">
 

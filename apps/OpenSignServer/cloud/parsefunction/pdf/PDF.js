@@ -166,13 +166,13 @@ async function sendNotifyMail(doc, signUser, mailProvider, publicUrl) {
       const signerName = signUser.Name;
       const signerEmail = signUser.Email;
       const viewDocUrl = `${publicUrl}/recipientSignPdf/${doc.objectId}`;
-      const subject = `Document "${pdfName}" has been signed by ${signerName}`;
+      const subject = `${signerName}様が「${pdfName}」に署名しました`;
       const body =
         "<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/></head><body><div style='background-color:#f5f5f5;padding:20px'><div style='background-color:white'>" +
-        `<div>${logo}</div><div style='padding:2px;font-family:system-ui;background-color:#47a3ad'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>Document signed by ${signerName}</p>` +
-        `</div><div style='padding:20px;font-family:system-ui;font-size:14px'><p>Dear ${creatorName},</p><p>${pdfName} has been signed by ${signerName} "${signerEmail}" successfully</p>` +
-        `<p><a href=${viewDocUrl} target=_blank>View Document</a></p></div></div><div><p>This is an automated email from ${TenantAppName}. For any queries regarding this email, ` +
-        `please contact the sender ${creatorEmail} directly.</p></div></div></body></html>`;
+        `<div>${logo}</div><div style='padding:2px;font-family:system-ui;background-color:#47a3ad'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>${signerName}様が署名しました</p>` +
+        `</div><div style='padding:20px;font-family:system-ui;font-size:14px'><p>${creatorName}様</p><p>「${pdfName}」に${signerName}様（${signerEmail}）が署名しました</p>` +
+        `<p><a href=${viewDocUrl} target=_blank>文書を確認する</a></p></div></div><div><p>このメールは次のサービスから自動送信しています：${TenantAppName}。お問い合わせは送信者へお願いします。` +
+        `送信者：${creatorEmail}</p></div></div></body></html>`;
 
       const params = {
         extUserId: sender.objectId,
@@ -210,12 +210,12 @@ async function sendCompletedMail(obj) {
     signersMail = sender.Email;
   }
   const recipient = signersMail;
-  let subject = `Document "${pdfName}" has been signed by all parties`;
+  let subject = `「${pdfName}」への全員の署名が完了しました`;
   let body =
     "<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /></head><body><div style='background-color:#f5f5f5;padding:20px'><div style='background-color:white'>" +
-    `<div>${logo}</div><div style='padding:2px;font-family:system-ui;background-color:#47a3ad'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>Document signed successfully</p></div><div>` +
-    `<p style='padding:20px;font-family:system-ui;font-size:14px'>All parties have successfully signed the document <b>"${pdfName}"</b>. Kindly download the document from the attachment.</p>` +
-    `</div></div><div><p>This is an automated email from ${TenantAppName}. For any queries regarding this email, please contact the sender ${sender.Email} directly.</p></div></div></body></html>`;
+    `<div>${logo}</div><div style='padding:2px;font-family:system-ui;background-color:#47a3ad'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>署名が完了しました</p></div><div>` +
+    `<p style='padding:20px;font-family:system-ui;font-size:14px'><b>「${pdfName}」</b>への全員の署名が完了しました。添付の文書をダウンロードして保管してください。</p>` +
+    `</div></div><div><p>このメールは次のサービスから自動送信しています：${TenantAppName}。お問い合わせは送信者へお願いします：${sender.Email}。</p></div></div></body></html>`;
 
   if (obj?.isCustomMail) {
     const tenant = sender?.TenantId;

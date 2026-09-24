@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function SelectLanguage(props) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const languages = [
+    { value: "ja", text: "日本語" },
     { value: "en", text: "English" }, //english
     { value: "es", text: "Española" }, //spanish
     { value: "fr", text: "Français" }, //french
@@ -13,7 +14,7 @@ function SelectLanguage(props) {
     { value: "hi", text: "हिन्दी" }, //hindi
     { value: "kr", text: "한국어" } //korean
   ];
-  const defaultLanguage = i18next.language || "en";
+  const defaultLanguage = i18next.resolvedLanguage || "ja";
   const [lang, setLang] = useState(defaultLanguage);
   // This function put query that helps to change the language
   const handleChangeLang = (e) => {
@@ -28,13 +29,14 @@ function SelectLanguage(props) {
       } flex justify-center items-center text-base-content`}
     >
       <select
+        aria-label={t("language")}
         value={lang}
         onChange={handleChangeLang}
         className={`${
           !props.isProfile ? " md:w-[15%] w-[50%]" : "w-[180px]"
         } op-select op-select-bordered op-select-sm `}
       >
-        <option disabled>select</option>
+        <option disabled>{t("language")}</option>
         {languages.map((item) => {
           return (
             <option key={item.value} value={item.value}>

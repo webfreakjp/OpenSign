@@ -1,6 +1,6 @@
-Welcome!
+メールアドレスの確認
 
-Click the link below to verify your email address:
+次のリンクからメールアドレスを確認してください：
 
 {{{link}}}
 

@@ -20,15 +20,15 @@ async function sendDeclineMail(doc, publicUrl, userId, reason) {
     const signerName = signUser?.signerPtr?.Name || '';
     const signerEmail = signUser?.signerPtr?.Email || signUser?.email || '';
     const viewDocUrl = `${publicUrl}/recipientSignPdf/${doc.objectId}`;
-    const subject = `Document "${pdfName}" has been declined by ${signerName}`;
+    const subject = `${signerName}様が「${pdfName}」への署名を辞退しました`;
     const body =
       "<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/></head><body><div style='background-color:#f5f5f5;padding:20px'><div style='background-color:white'>" +
-      `<div>${logo}</div><div style='padding:2px;font-family:system-ui;background-color:#47a3ad'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>Document declined by ${signerName}</p>` +
-      `</div><div style='padding:20px;font-family:system-ui;font-size:14px'><p>Dear ${creatorName},</p>` +
-      `<p>${pdfName} has been declined by ${signerName} "${signerEmail}" on ${new Date().toLocaleDateString()}.</p>` +
-      `<p>Decline Reason: ${reason || 'Not specified'}</p>` +
-      `<p><a href=${viewDocUrl} target=_blank>View Document</a></p></div></div><div><p>This is an automated email from ${TenantAppName}. For any queries regarding this email, ` +
-      `please contact the sender ${creatorEmail} directly.</p></div></div></body></html>`;
+      `<div>${logo}</div><div style='padding:2px;font-family:system-ui;background-color:#47a3ad'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>${signerName}様が署名を辞退しました</p>` +
+      `</div><div style='padding:20px;font-family:system-ui;font-size:14px'><p>${creatorName}様</p>` +
+      `<p>${new Date().toLocaleDateString()}に${signerName}様（${signerEmail}）が「${pdfName}」への署名を辞退しました。</p>` +
+      `<p>辞退の理由：${reason || '未記入'}</p>` +
+      `<p><a href=${viewDocUrl} target=_blank>文書を確認する</a></p></div></div><div><p>このメールは次のサービスから自動送信しています：${TenantAppName}。お問い合わせは送信者へお願いします。` +
+      `送信者：${creatorEmail}</p></div></div></body></html>`;
 
     const params = {
       extUserId: sender.objectId,

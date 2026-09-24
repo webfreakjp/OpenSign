@@ -119,8 +119,8 @@ export function getEnv() {
 }
 const appName = "OpenSign™";
 
-export const defaultMailBody = `<p>Hi {{receiver_name}},</p><br><p>We hope this email finds you well. {{sender_name}}&nbsp;has requested you to review and sign&nbsp;{{document_title}}.</p><p>Your signature is crucial to proceed with the next steps as it signifies your agreement and authorization.</p><br><p><a href='{{signing_url}}' rel='noopener noreferrer' target='_blank'>Sign here</a></p><br><br><p>If you have any questions or need further clarification regarding the document or the signing process,  please contact the sender.</p><br><p>Thanks</p><p> Team ${appName}</p><br>`;
-export const defaultMailSubject = `{{sender_name}} has requested you to sign {{document_title}}`;
+export const defaultMailBody = `<p>{{receiver_name}}様</p><br><p>{{sender_name}}様より「{{document_title}}」への署名が依頼されています。文書の内容を確認して署名してください。</p><p>内容に同意される場合に署名してください。</p><br><p><a href='{{signing_url}}' rel='noopener noreferrer' target='_blank'>文書を確認して署名する</a></p><br><br><p>文書や署名手続きについてのご質問は、送信者にお問い合わせください。</p><br><p>よろしくお願いいたします。</p><p> Team ${appName}</p><br>`;
+export const defaultMailSubject = `{{sender_name}}様から「{{document_title}}」への署名依頼`;
 export const nonPresentMaskCss = (base) => ({
   ...base,
   width: "0px",
@@ -2052,7 +2052,7 @@ export const embedWidgetsToDoc = async (
 ) => {
   // `fontBytes` is used to embed custom font in pdf
   const fontBytes = await fileasbytes(
-    "https://cdn.opensignlabs.com/webfonts/times.ttf"
+    removeTrailingSegment(appInfo.baseUrl) + "/public/fonts/ipaexg.ttf"
   );
   pdfDoc.registerFontkit(fontkit);
   const font = await pdfDoc.embedFont(fontBytes, { subset: true });
@@ -4224,29 +4224,29 @@ export const mailTemplate = (param) => {
   const appName = "OpenSign™";
   const logo = `<div style='padding:10px'><img src='https://qikinnovation.ams3.digitaloceanspaces.com/logo.png' height='50' /></div>`;
 
-  const subject = `${param.senderName} has requested you to sign "${param.title}"`;
+  const subject = `${param.senderName}様から「${param.title}」への署名依頼`;
   const body =
     "<html><head><meta http-equiv='Content-Type' content='text/html;charset=UTF-8' /></head><body><div style='background-color:#f5f5f5;padding:20px'><div style='background:white;padding-bottom:20px'>" +
     logo +
-    `<div style='padding:2px;font-family:system-ui;background-color:${themeColor}'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>Digital Signature Request</p></div><div><p style='padding:20px;font-size:14px;margin-bottom:10px'>` +
+    `<div style='padding:2px;font-family:system-ui;background-color:${themeColor}'><p style='font-size:20px;font-weight:400;color:white;padding-left:20px'>署名のお願い</p></div><div><p style='padding:20px;font-size:14px;margin-bottom:10px'>` +
     param.senderName +
-    " has requested you to review and sign <strong>" +
+    "様より、次の文書の確認と署名が依頼されています：<strong>" +
     param.title +
-    "</strong>.</p><div style='padding: 5px 0px 5px 25px;display:flex;flex-direction:row;justify-content:space-around'><table><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Sender</td><td></td><td style='color:#626363;font-weight:bold'>" +
+    "</strong>.</p><div style='padding: 5px 0px 5px 25px;display:flex;flex-direction:row;justify-content:space-around'><table><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>送信者</td><td></td><td style='color:#626363;font-weight:bold'>" +
     param.senderMail +
-    "</td></tr><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Organization</td><td></td><td style='color:#626363;font-weight:bold'> " +
+    "</td></tr><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>組織</td><td></td><td style='color:#626363;font-weight:bold'> " +
     param.organization +
-    "</td></tr><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Expires on</td><td></td><td style='color:#626363;font-weight:bold'>" +
+    "</td></tr><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>有効期限</td><td></td><td style='color:#626363;font-weight:bold'>" +
     param.localExpireDate +
-    "</td></tr><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Note</td><td></td><td style='color:#626363;font-weight:bold'>" +
+    "</td></tr><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>連絡事項</td><td></td><td style='color:#626363;font-weight:bold'>" +
     param.note +
     "</td></tr><tr><td></td><td></td></tr></table></div> <div style='margin-left:70px'><a target=_blank href=" +
     param.signingUrl +
-    "><button style='padding:12px;background-color:#d46b0f;color:white;border:0px;font-weight:bold;margin-top:30px'>Sign here</button></a></div><div style='display:flex;justify-content:center;margin-top:10px'></div></div></div><div><p> This is an automated email from " +
+    "><button style='padding:12px;background-color:#d46b0f;color:white;border:0px;font-weight:bold;margin-top:30px'>文書を確認して署名する</button></a></div><div style='display:flex;justify-content:center;margin-top:10px'></div></div></div><div><p> このメールは次のサービスから自動送信しています：" +
     appName +
-    ". For any queries regarding this email, please contact the sender " +
+    "。お問い合わせは送信者へお願いします：" +
     param.senderMail +
-    " directly.</p></div></div></body></html> ";
+    "。</p></div></div></body></html> ";
   return { subject, body };
 };
 

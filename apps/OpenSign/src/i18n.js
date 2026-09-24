@@ -11,7 +11,8 @@ i18n
     backend: {
       loadPath: "/locales/{{lng}}/{{ns}}.json"
     },
-    fallbackLng: "en", // Fallback to English if no other language is detected
+    fallbackLng: "ja",
+    load: "languageOnly",
     detection: {
       // Specifies the default language to fall back to if the detected language is not available.
       order: ["localStorage", "navigator"],
@@ -25,7 +26,11 @@ i18n
     interpolation: {
       escapeValue: false // Not needed for react as it escapes by default
     },
-    whitelist: ["en", "es", "fr", "it", "de", "hi", "kr"] // List of allowed languages
+    supportedLngs: ["ja", "en", "es", "fr", "it", "de", "hi", "kr"] // List of allowed languages
   });
+
+i18n.on("languageChanged", (language) => {
+  document.documentElement.lang = language;
+});
 
 export default i18n;

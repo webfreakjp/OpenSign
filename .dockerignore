@@ -1,0 +1,26 @@
+# Keep private configuration and runtime data out of every root build context.
+.git
+**/node_modules
+**/build
+**/.env*
+!.env.example
+**/.secrets
+**/.private
+**/*-docs
+**/backups
+**/artifacts
+**/screenshots
+**/test-results
+**/playwright-report
+**/coverage
+**/*.log
+**/*.p12
+**/*.pfx
+**/*.pem
+**/*.key
+**/*.dump
+apps/OpenSignServer/files/files
+apps/OpenSignServer/exports/*
+apps/OpenSignServer/pdfFile/*
+apps/OpenSignServer/test_*.pdf
+apps/OpenSignServer/logs

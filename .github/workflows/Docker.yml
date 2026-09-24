@@ -13,6 +13,8 @@ on:
 
 jobs:
   docker:
+    # Forks publish to their own GHCR namespace via containers.yml.
+    if: github.repository == 'OpenSignLabs/OpenSign'
     runs-on: ubuntu-latest
     strategy:
       matrix:

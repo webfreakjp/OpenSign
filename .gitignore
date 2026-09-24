@@ -25,3 +25,25 @@ yarn-error.log*
 apps/OpenSign/public/mfbuild/*
 microfrontends/SignDocuments/build/*
 apps/OpenSignServer/files/files/*
+# Self-hosted secrets and runtime data (including nested app contexts)
+**/node_modules/
+**/build/
+.env*
+**/.env*
+!.env.example
+.secrets/
+.private/
+backups/
+**/*.log
+**/coverage/
+**/test-results/
+**/playwright-report/
+**/screenshots/
+**/artifacts/
+apps/OpenSignServer/files/files/
+apps/OpenSignServer/exports/*
+apps/OpenSignServer/pdfFile/*
+apps/OpenSignServer/*.p12
+apps/OpenSignServer/*.pfx
+apps/OpenSignServer/*.pdf
+apps/OpenSignServer/logs/

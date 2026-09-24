@@ -38,10 +38,10 @@ const MailTemplateEditor = ({
     request: "basic",
     completion: "basic"
   });
-  const defaultRequestSubject = `{{sender_name}} has requested you to sign {{document_title}}`;
-  const defaultRequestBody = `<p>Hi {{receiver_name}},</p><br><p>We hope this email finds you well. {{sender_name}}&nbsp;has requested you to review and sign&nbsp;{{document_title}}.</p><p>Your signature is crucial to proceed with the next steps as it signifies your agreement and authorization.</p><br><p><a href='{{signing_url}}' rel='noopener noreferrer' target='_blank'>Sign here</a></p><br><br><p>If you have any questions or need further clarification regarding the document or the signing process, please contact the sender.</p><br><p>Thanks</p><p> Team ${appName}</p><br>`;
-  const defaultCompletionSubject = `Document {{document_title}} has been signed by all parties`;
-  const defaultCompletionBody = `<p>Hi {{sender_name}},</p><br><p>All parties have successfully signed the document {{document_title}}. Kindly download the document from the attachment.</p><br><p>Thanks</p><p> Team ${appName}</p><br>`;
+  const defaultRequestSubject = `{{sender_name}}様から「{{document_title}}」への署名依頼`;
+  const defaultRequestBody = `<p>{{receiver_name}}様</p><br><p>{{sender_name}}様より「{{document_title}}」への署名が依頼されています。文書の内容を確認して署名してください。</p><p>内容に同意される場合に署名してください。</p><br><p><a href='{{signing_url}}' rel='noopener noreferrer' target='_blank'>文書を確認して署名する</a></p><br><br><p>文書や署名手続きについてのご質問は、送信者にお問い合わせください。</p><br><p>よろしくお願いいたします。</p><p> Team ${appName}</p><br>`;
+  const defaultCompletionSubject = `「{{document_title}}」への全員の署名が完了しました`;
+  const defaultCompletionBody = `<p>{{sender_name}}様</p><br><p>「{{document_title}}」への全員の署名が完了しました。添付の文書をダウンロードして保管してください。</p><br><p>よろしくお願いいたします。</p><p> Team ${appName}</p><br>`;
   const cloudfunction =
         "updatetenant";
 
@@ -66,7 +66,7 @@ const MailTemplateEditor = ({
       alert(t("user-not-exist"));
     } else if (tenantRes) {
       const updateRes = tenantRes;
-      const defaultRequestBody = `<p>Hi {{receiver_name}},</p><br><p>We hope this email finds you well. {{sender_name}}&nbsp;has requested you to review and sign&nbsp;{{document_title}}.</p><p>Your signature is crucial to proceed with the next steps as it signifies your agreement and authorization.</p><br><p><a href='{{signing_url}}' rel='noopener noreferrer' target='_blank'>Sign here</a></p><br><br><p>If you have any questions or need further clarification regarding the document or the signing process, please contact the sender.</p><br><p>Thanks</p><p> Team ${appName}</p><br>`;
+      const defaultRequestBody = `<p>{{receiver_name}}様</p><br><p>{{sender_name}}様より「{{document_title}}」への署名が依頼されています。文書の内容を確認して署名してください。</p><p>内容に同意される場合に署名してください。</p><br><p><a href='{{signing_url}}' rel='noopener noreferrer' target='_blank'>文書を確認して署名する</a></p><br><br><p>文書や署名手続きについてのご質問は、送信者にお問い合わせください。</p><br><p>よろしくお願いいたします。</p><p> Team ${appName}</p><br>`;
       if (updateRes?.RequestBody) {
         setRequestBody((p) => ({
           ...p,
