@@ -16,6 +16,7 @@ import SelectLanguage from "../components/pdf/SelectLanguage";
 import LoaderWithMsg from "../primitives/LoaderWithMsg";
 import ModalUi from "../primitives/ModalUi";
 import Loader from "../primitives/Loader";
+import HandleError from "../primitives/HandleError";
 
 function GuestLogin() {
   const { t, i18n } = useTranslation();
@@ -43,13 +44,19 @@ function GuestLogin() {
     company: ""
   });
   const [isOptionalDetails, setIsOptionalDetails] = useState(false);
+  const [documentError, setDocumentError] = useState("");
 
   const navigateToDoc = async (docId, contactId) => {
+    setDocumentError("");
     try {
       const docDetails = await Parse.Cloud.run("getDocument", {
         docId: docId
       });
-      if (!docDetails.error) {
+      if (docDetails?.requiresOtp === true) {
+        setIsLoading({ isLoad: false });
+        return "otp_required";
+      }
+      if (docDetails?.objectId && !docDetails.error) {
         if (sendmail === "false") {
           navigate(
             `/load/recipientSignPdf/${docId}/${contactId}?sendmail=${sendmail}`
@@ -57,14 +64,17 @@ function GuestLogin() {
         } else {
           navigate(`/load/recipientSignPdf/${docId}/${contactId}`);
         }
-        return true;
+        return "opened";
       } else {
+        setDocumentError(t("document-deleted"));
         setIsLoading({ isLoad: false });
-        return false;
+        return "unavailable";
       }
     } catch (err) {
       console.log("err while getting doc", err);
-      return false;
+      setDocumentError(t("something-went-wrong-mssg"));
+      setIsLoading({ isLoad: false });
+      return "unavailable";
     }
   };
 
@@ -231,18 +241,19 @@ function GuestLogin() {
           params
         );
         setContactId(linkContactRes.contactId);
-        const IsEnableOTP = await navigateToDoc(
+        const access = await navigateToDoc(
           documentId,
           linkContactRes.contactId
         );
-        if (!IsEnableOTP) {
-          setEnterOtp(true);
+        if (access === "otp_required") {
           await SendOtp();
         }
       } catch (err) {
         setLoading(false);
         alert(t("something-went-wrong-mssg"));
         console.log("Err in link ext contact", err);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -306,7 +317,9 @@ function GuestLogin() {
         </ModalUi>
       )}
 
-      {isLoading.isLoad ? (
+      {documentError ? (
+        <HandleError handleError={documentError} />
+      ) : isLoading.isLoad ? (
         <LoaderWithMsg isLoading={isLoading} />
       ) : (
         <div className="pb-1 md:pb-4 pt-10 md:px-10 lg:px-16">

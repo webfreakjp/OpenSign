@@ -50,7 +50,10 @@ export default async function getDocument(request) {
                 return { error: "You don't have access of this document!" };
               }
             } else {
-              return { error: "You don't have access of this document!" };
+              return {
+                error: "You don't have access of this document!",
+                requiresOtp: true,
+              };
             }
           }
         } else {
