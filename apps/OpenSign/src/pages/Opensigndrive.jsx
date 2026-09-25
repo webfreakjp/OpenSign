@@ -12,7 +12,7 @@ import Parse from "parse";
 import ModalUi from "../primitives/ModalUi";
 import TourContentWithBtn from "../primitives/TourContentWithBtn";
 import Tour from "../primitives/Tour";
-import axios from "axios";
+import { markTourCompleted } from "../utils/tourStatus";
 import Loader from "../primitives/Loader";
 import { useTranslation } from "react-i18next";
 
@@ -480,36 +480,13 @@ function Opensigndrive() {
   const closeTour = async () => {
     setIsTour(false);
     setShowTourFirstTime(false);
-    if (isDontShow) {
-      const serverUrl = localStorage.getItem("baseUrl");
-      const appId = localStorage.getItem("parseAppId");
-      const json = JSON.parse(localStorage.getItem("Extand_Class"));
-      const extUserId = json && json.length > 0 && json[0].objectId;
-      let updatedTourStatus = [];
-      if (tourStatusArr.length > 0) {
-        updatedTourStatus = [...tourStatusArr];
-        const driveTourIndex = tourStatusArr.findIndex(
-          (obj) => obj["driveTour"] === false || obj["driveTour"] === true
-        );
-        if (driveTourIndex !== -1) {
-          updatedTourStatus[driveTourIndex] = { driveTour: true };
-        } else {
-          updatedTourStatus.push({ driveTour: true });
-        }
-      } else {
-        updatedTourStatus = [{ driveTour: true }];
+    if (isDontShow && !tourStatusArr.some((tour) => tour.driveTour)) {
+      try {
+        await markTourCompleted("driveTour");
+        setTourStatusArr((status) => [...status, { driveTour: true }]);
+      } catch {
+        setIsAlert({ isShow: true, alertMessage: t("tour-save-error") });
       }
-      await axios.put(
-        serverUrl + "classes/contracts_Users/" + extUserId,
-        {
-          TourStatus: updatedTourStatus
-        },
-        {
-          headers: {
-            "X-Parse-Application-Id": appId
-          }
-        }
-      );
     }
   };
   //function to use check tour status of open sign drive

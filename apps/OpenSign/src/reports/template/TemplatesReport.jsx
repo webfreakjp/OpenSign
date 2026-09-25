@@ -7,6 +7,7 @@ import Alert from "../../primitives/Alert";
 import Tooltip from "../../primitives/Tooltip";
 import ShareButton from "../../primitives/ShareButton";
 import Tour from "../../primitives/Tour";
+import { markTourCompleted } from "../../utils/tourStatus";
 import Parse from "parse";
 import {
   copytoData,
@@ -493,31 +494,12 @@ const TemplatesReport = (props) => {
     const isTourSaved =
       tourStatusArr?.some((obj) => obj.templateReport) || false;
     if (!isTourSaved) {
-      const serverUrl = localStorage.getItem("baseUrl");
-      const appId = localStorage.getItem("parseAppId");
-      const json = JSON.parse(localStorage.getItem("Extand_Class"));
-      const extUserId = json && json.length > 0 && json[0].objectId;
-      let updatedTourStatus = [];
-      if (tourStatusArr.length > 0) {
-        updatedTourStatus = [...tourStatusArr];
-        const templateReportIndex = tourStatusArr.findIndex(
-          (obj) =>
-            obj["templateReport"] === false || obj["templateReport"] === true
-        );
-        if (templateReportIndex !== -1) {
-          updatedTourStatus[templateReportIndex] = { templateReport: true };
-        } else {
-          updatedTourStatus.push({ templateReport: true });
-        }
-      } else {
-        updatedTourStatus = [{ templateReport: true }];
+      try {
+        await markTourCompleted("templateReport");
+        setTourStatusArr((status) => [...status, { templateReport: true }]);
+      } catch {
+        alert(t("tour-save-error"));
       }
-
-      await axios.put(
-        serverUrl + "classes/contracts_Users/" + extUserId,
-        { TourStatus: updatedTourStatus },
-        { headers: { "X-Parse-Application-Id": appId } }
-      );
     }
   };
 

@@ -42,6 +42,7 @@ import {
 } from "../constant/Utils";
 import { useParams } from "react-router";
 import Tour from "../primitives/Tour";
+import { markTourCompleted } from "../utils/tourStatus";
 import Signedby from "../components/pdf/Signedby";
 import Header from "../components/pdf/PdfHeader";
 import RenderPdf from "../components/pdf/RenderPdf";
@@ -115,7 +116,6 @@ function SignYourSelf() {
   const [signTour, setSignTour] = useState(true);
   const [checkTourStatus, setCheckTourStatus] = useState(false);
   const [signerUserId, setSignerUserId] = useState();
-  const [tourStatus, setTourStatus] = useState([]);
   const [contractName, setContractName] = useState("");
   const [containerWH, setContainerWH] = useState({ width: 0, height: 0 });
   const [isPageCopy, setIsPageCopy] = useState(false);
@@ -294,7 +294,6 @@ function SignYourSelf() {
         setSignerUserId(contractUsersRes[0].objectId);
         const tourstatus = contractUsersRes?.[0]?.TourStatus || [];
         if (tourstatus && tourstatus.length > 0 && !isCompleted) {
-          setTourStatus(tourstatus);
           const tour = tourstatus?.some((data) => data.signyourself) || false;
           setSignTour(!tour);
           setCheckTourStatus(tour);
@@ -309,7 +308,6 @@ function SignYourSelf() {
           setSignerUserId(contractContactBook[0].objectId);
           const tourstatus = contractContactBook?.[0]?.TourStatus || [];
           if (tourstatus && tourstatus.length > 0 && !isCompleted) {
-            setTourStatus(tourstatus);
             const tour = tourstatus?.some((data) => data.signyourself) || false;
             setSignTour(!tour);
             setCheckTourStatus(tour);
@@ -985,35 +983,14 @@ function SignYourSelf() {
     setSignTour(false);
     setIsDontShow(true);
     if (!checkTourStatus && isDontShow) {
-      let updatedTourStatus = [];
-      if (tourStatus.length > 0) {
-        updatedTourStatus = [...tourStatus];
-        const signyourselfIndex = tourStatus.findIndex(
-          (obj) => obj["signyourself"] === false || obj["signyourself"] === true
-        );
-        if (signyourselfIndex !== -1) {
-          updatedTourStatus[signyourselfIndex] = { signyourself: true };
-        } else {
-          updatedTourStatus.push({ signyourself: true });
-        }
-      } else {
-        updatedTourStatus = [{ signyourself: true }];
-      }
       try {
-        await axios.put(
-          `${localStorage.getItem("baseUrl")}classes/contracts${contractName}/${signerUserId}`,
-          { TourStatus: updatedTourStatus },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "X-Parse-Application-Id": localStorage.getItem("parseAppId"),
-              sessionToken: localStorage.getItem("accesstoken")
-            }
-          }
-        );
-      } catch (err) {
-        console.log("axois err ", err);
-        alert(t("something-went-wrong-mssg"));
+        await markTourCompleted("signyourself", {
+          className: `contracts${contractName}`,
+          objectId: signerUserId
+        });
+        setCheckTourStatus(true);
+      } catch {
+        alert(t("tour-save-error"));
       }
     }
   };

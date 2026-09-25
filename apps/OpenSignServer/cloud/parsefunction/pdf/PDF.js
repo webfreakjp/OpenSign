@@ -146,7 +146,7 @@ async function updateDoc(
 }
 
 // `sendNotifyMail` is used to send notification mail of signer signed the document
-async function sendNotifyMail(doc, signUser, mailProvider, publicUrl) {
+export async function sendNotifyMail(doc, signUser, mailProvider, publicUrl) {
   try {
     const TenantAppName = appName;
     const logo =
@@ -158,7 +158,13 @@ async function sendNotifyMail(doc, signUser, mailProvider, publicUrl) {
       doc?.Placeholders?.length > 0 ? doc.Placeholders.filter(isCompletionRelevant) : [];
     const signersCount = completionRelevant?.length;
     const remainingSign = signersCount - auditTrailCount;
-    if (remainingSign > 1 && doc?.NotifyOnSignatures) {
+    // ExtUserPtr is included from the database for each signing request. An
+    // owner opting out also stops progress emails for existing documents.
+    if (
+      remainingSign > 1 &&
+      doc?.NotifyOnSignatures &&
+      doc?.ExtUserPtr?.NotifyOnSignatures !== false
+    ) {
       const sender = doc.ExtUserPtr;
       const pdfName = doc.Name;
       const creatorName = doc.ExtUserPtr.Name;
@@ -191,7 +197,7 @@ async function sendNotifyMail(doc, signUser, mailProvider, publicUrl) {
 }
 
 // `sendCompletedMail` is used to send copy of completed document mail
-async function sendCompletedMail(obj) {
+export async function sendCompletedMail(obj) {
   const url = obj.doc?.SignedUrl;
   const doc = obj.doc;
   const sender = obj.doc.ExtUserPtr;

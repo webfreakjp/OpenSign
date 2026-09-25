@@ -102,6 +102,7 @@ const Forms = (props) => {
   const extUserData =
     localStorage.getItem("Extand_Class") &&
     JSON.parse(localStorage.getItem("Extand_Class"))?.[0];
+  const notifyOnSignatures = extUserData?.NotifyOnSignatures ?? true;
   const sendinorder =
     extUserData?.SendinOrder !== undefined && extUserData?.SendinOrder === false
       ? "false"
@@ -127,7 +128,7 @@ const Forms = (props) => {
     try {
         setFormData((obj) => ({
           ...obj,
-          NotifyOnSignatures: true,
+          NotifyOnSignatures: notifyOnSignatures,
           SendinOrder: sendinorder,
           IsTourEnabled: istourenabled,
         }));
@@ -505,10 +506,6 @@ const Forms = (props) => {
           setCc([]);
           setSelectedColors(pensList);
           setFolder({ ObjectId: "", Name: "" });
-          const notifySign =
-                extUserData?.NotifyOnSignatures !== undefined
-                ? extUserData?.NotifyOnSignatures
-                : true;
           setFormData({
             Name: "",
             Description: "",
@@ -520,7 +517,7 @@ const Forms = (props) => {
             SendinOrder: sendinorder,
             password: "",
             file: "",
-            NotifyOnSignatures: notifySign,
+            NotifyOnSignatures: notifyOnSignatures,
             remindOnceInEvery: 5,
             autoreminder: false,
             IsEnableOTP: "false",
@@ -599,10 +596,6 @@ const Forms = (props) => {
     setCc([]);
     setSelectedColors(pensList);
     setFolder({ ObjectId: "", Name: "" });
-    const notifySign =
-          extUserData?.NotifyOnSignatures !== undefined
-          ? extUserData?.NotifyOnSignatures
-          : true;
     let obj = {
       Name: "",
       Description: "",
@@ -618,7 +611,7 @@ const Forms = (props) => {
       autoreminder: false,
       IsEnableOTP: "false",
       IsTourEnabled: istourenabled,
-      NotifyOnSignatures: notifySign,
+      NotifyOnSignatures: notifyOnSignatures,
       RedirectUrl: "",
       AllowModifications: false,
     };

@@ -5,6 +5,7 @@ import axios from "axios";
 import "../styles/signature.css";
 import WidgetComponent from "../components/pdf/WidgetComponent";
 import Tour from "../primitives/Tour";
+import { markTourCompleted } from "../utils/tourStatus";
 import SignerListPlace from "../components/pdf/SignerListPlace";
 import Header from "../components/pdf/PdfHeader";
 import WidgetNameModal from "../components/pdf/WidgetNameModal";
@@ -111,7 +112,6 @@ const TemplatePlaceholder = () => {
   const [pdfNewWidth, setPdfNewWidth] = useState();
   const [templateTour, setTemplateTour] = useState(false);
   const [checkTourStatus, setCheckTourStatus] = useState(false);
-  const [tourStatus, setTourStatus] = useState([]);
   const [signerUserId, setSignerUserId] = useState();
   const [pdfOriginalWH, setPdfOriginalWH] = useState([]);
   const [containerWH, setContainerWH] = useState({ width: 0, height: 0 });
@@ -419,7 +419,6 @@ const TemplatePlaceholder = () => {
         setSignerUserId(res[0].objectId);
         const tourstatus = res[0].TourStatus && res[0].TourStatus;
         if (tourstatus && tourstatus.length > 0) {
-          setTourStatus(tourstatus);
           const tour = tourstatus?.some((data) => data.template) || false;
           setTemplateTour(!tour);
           setCheckTourStatus(tour);
@@ -1175,35 +1174,11 @@ const TemplatePlaceholder = () => {
     setTemplateTour(false);
     setIsDontShow(true);
     if (!checkTourStatus && isDontShow) {
-      let updatedTourStatus = [];
-      if (tourStatus.length > 0) {
-        updatedTourStatus = [...tourStatus];
-        const templateIndex = tourStatus.findIndex(
-          (obj) => obj["template"] === false || obj["template"] === true
-        );
-        if (templateIndex !== -1) {
-          updatedTourStatus[templateIndex] = { template: true };
-        } else {
-          updatedTourStatus.push({ template: true });
-        }
-      } else {
-        updatedTourStatus = [{ template: true }];
-      }
       try {
-        await axios.put(
-          `${localStorage.getItem("baseUrl")}classes/contracts_Users/${signerUserId}`,
-          { TourStatus: updatedTourStatus },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "X-Parse-Application-Id": localStorage.getItem("parseAppId"),
-              sessionToken: localStorage.getItem("accesstoken")
-            }
-          }
-        );
+        await markTourCompleted("template", { objectId: signerUserId });
         setCheckTourStatus(true);
-      } catch (err) {
-        console.log("axois err ", err);
+      } catch {
+        alert(t("tour-save-error"));
       }
     }
   };

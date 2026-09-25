@@ -6,7 +6,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Sidebar from "../components/sidebar/Sidebar";
 import Tour from "../primitives/Tour";
-import axios from "axios";
+import { markTourCompleted } from "../utils/tourStatus";
+import Alert from "../primitives/Alert";
 import { useDispatch, useSelector } from "react-redux";
 import Parse from "parse";
 import {
@@ -28,6 +29,7 @@ const HomeLayout = () => {
   const [isCloseBtn, setIsCloseBtn] = useState(true);
   const [isTour, setIsTour] = useState(false);
   const [tourStatusArr, setTourStatusArr] = useState([]);
+  const [tourSaveError, setTourSaveError] = useState(false);
   const [tourConfigs, setTourConfigs] = useState([]);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const tenantId = localStorage.getItem("TenantId");
@@ -131,31 +133,14 @@ const HomeLayout = () => {
   };
   const closeTour = async () => {
     setIsTour(false);
-    const serverUrl = localStorage.getItem("baseUrl");
-    const appId = localStorage.getItem("parseAppId");
-    const json = JSON.parse(localStorage.getItem("Extand_Class"));
-    const extUserId = json && json.length > 0 && json[0].objectId;
-
-    let updatedTourStatus = [];
-    if (tourStatusArr.length > 0) {
-      updatedTourStatus = [...tourStatusArr];
-      const loginTourIndex = tourStatusArr.findIndex(
-        (obj) => obj["loginTour"] === false || obj["loginTour"] === true
-      );
-      if (loginTourIndex !== -1) {
-        updatedTourStatus[loginTourIndex] = { loginTour: true };
-      } else {
-        updatedTourStatus.push({ loginTour: true });
-      }
-    } else {
-      updatedTourStatus = [{ loginTour: true }];
+    setTourSaveError(false);
+    if (tourStatusArr.some((tour) => tour.loginTour)) return;
+    try {
+      await markTourCompleted("loginTour");
+      setTourStatusArr((status) => [...status, { loginTour: true }]);
+    } catch {
+      setTourSaveError(true);
     }
-
-    await axios.put(
-      serverUrl + "classes/contracts_Users/" + extUserId,
-      { TourStatus: updatedTourStatus },
-      { headers: { "X-Parse-Application-Id": appId } }
-    );
   };
 
   async function checkTourStatus() {
@@ -174,6 +159,14 @@ const HomeLayout = () => {
 
   return isValidSession && localStorage.getItem("accesstoken") ? (
     <div className="flex flex-col h-screen overflow-hidden">
+      {tourSaveError && (
+        <Alert type="danger">
+          {t("tour-save-error")}
+          <button className="op-btn op-btn-sm ml-2" onClick={closeTour}>
+            {t("retry")}
+          </button>
+        </Alert>
+      )}
       {/* HEADER */}
       <header className="z-[501]">
         {!isLoader && <Header setIsLoggingOut={setIsLoggingOut} />}

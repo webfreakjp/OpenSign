@@ -6,6 +6,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import RenderAllPdfPage from "../components/pdf/RenderAllPdfPage";
 import Tour from "../primitives/Tour";
+import { markTourCompleted } from "../utils/tourStatus";
 import Confetti from "react-confetti";
 import moment from "moment";
 import {
@@ -96,7 +97,6 @@ function PdfRequestFiles(
   const [handleError, setHandleError] = useState();
   const [isCelebration, setIsCelebration] = useState(false);
   const [isReqSignTourDisabled, setIsReqSignTourDisabled] = useState(true);
-  const [tourStatus, setTourStatus] = useState([]);
   const [isDontShowCheckbox, setIsDontShowCheckbox] = useState(false);
   const [isLoading, setIsLoading] = useState({
     isLoad: true,
@@ -631,7 +631,6 @@ function PdfRequestFiles(
       if (tourData && tourData.length > 0) {
         const checkTourRequest =
           tourData?.some((data) => data?.requestSign) || false;
-        setTourStatus(tourData);
         setIsDontShowCheckbox(!checkTourRequest);
         setIsReqSignTourDisabled(checkTourRequest);
       } else {
@@ -1251,38 +1250,14 @@ function PdfRequestFiles(
           console.log("update tour messages error", e);
         }
       } else {
-        let updatedTourStatus = [];
-        if (tourStatus.length > 0) {
-          updatedTourStatus = [...tourStatus];
-          const requestSignIndex = tourStatus.findIndex(
-            (obj) => obj["requestSign"] === false || obj["requestSign"] === true
-          );
-          if (requestSignIndex !== -1) {
-            updatedTourStatus[requestSignIndex] = { requestSign: true };
-          } else {
-            updatedTourStatus.push({ requestSign: true });
-          }
-        } else {
-          updatedTourStatus = [{ requestSign: true }];
-        }
         try {
-          await axios.put(
-            `${localStorage.getItem(
-              "baseUrl"
-            )}classes/contracts${contractName}/${signerUserId}`,
-            {
-              TourStatus: updatedTourStatus
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                "X-Parse-Application-Id": localStorage.getItem("parseAppId"),
-                "X-Parse-Session-Token": localStorage.getItem("accesstoken")
-              }
-            }
-          );
-        } catch (e) {
-          console.log("update tour messages error", e);
+          await markTourCompleted("requestSign", {
+            className: `contracts${contractName}`,
+            objectId: signerUserId
+          });
+          setIsDontShowCheckbox(false);
+        } catch {
+          alert(t("tour-save-error"));
         }
       }
     }

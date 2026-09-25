@@ -830,6 +830,8 @@
   "server-down": "Unable to connect to the {{appName}} server. If you are self-hosting {{appName}}, please ensure that all the steps in the documentation have been followed correctly. If you're running {{appName}} locally, you might be accessing it through an incorrect port number.",
   "admin-exists": "Admin already exists. Please login to the application using admin credentials in order to manage users.",
   "enable-tour": "Enable tour",
+  "tour-save-error": "Your tour preferences could not be saved. Please try again.",
+  "retry": "Retry",
   "istourenabled-help": {
     "p1": "This will enable a guided tour for signers, providing instructions during the signing process.",
     "p2": "This will disable the guided tour, ensuring a faster, uninterrupted signing experience.",
@@ -855,7 +857,7 @@
   },
   "notify-on-signatures": "Notify on signatures",
   "notify-on-signatures-help": {
-    "p1": "The document creator will receive an email notification whenever a signer signs the document.",
+    "p1": "The document creator receives signing progress emails when notifications are enabled for the document. Turning notifications off in Preferences stops progress emails for all documents, including existing ones.",
     "note": "Note: Regardless of this setting, a completion email with the signed document and completion certificate attached is always sent to all signers and the document owner."
   },
   "expiry-date": "Expiry date",
