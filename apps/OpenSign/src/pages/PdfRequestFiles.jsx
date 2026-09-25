@@ -145,7 +145,7 @@ function PdfRequestFiles(
   const [isDownloadModal, setIsDownloadModal] = useState(false);
   const [signatureType, setSignatureType] = useState([]);
   const [pdfBase64Url, setPdfBase64Url] = useState("");
-  const [isAgree, setIsAgree] = useState(false);
+  const [hasStartedSigning, setHasStartedSigning] = useState(false);
   const [redirectTimeLeft, setRedirectTimeLeft] = useState(5);
   const [isredirectCanceled, setIsredirectCanceled] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -812,9 +812,24 @@ function PdfRequestFiles(
                   const usermail = {
                     Email: removePrefill[newIndex]?.email || ""
                   };
-                  const user = usermail?.Email
-                    ? usermail
-                    : updatedDoc.updatedPdfDetails?.[0]?.Signers[newIndex];
+                  const nextPlaceholder = removePrefill[newIndex];
+                  const nextSignerId =
+                    nextPlaceholder?.signerObjId ||
+                    nextPlaceholder?.signerPtr?.objectId;
+                  const nextSigner =
+                    updatedDoc.updatedPdfDetails?.[0]?.Signers?.find(
+                      (signer) =>
+                        nextSignerId && signer.objectId === nextSignerId
+                    ) ||
+                    updatedDoc.updatedPdfDetails?.[0]?.Signers?.find(
+                      (signer) =>
+                        usermail.Email && signer.Email === usermail.Email
+                    );
+                  const user =
+                    nextSigner ||
+                    (usermail.Email
+                      ? usermail
+                      : updatedDoc.updatedPdfDetails?.[0]?.Signers[newIndex]);
                   if (
                     sendmail !== "false" &&
                     sendInOrder
@@ -891,6 +906,8 @@ function PdfRequestFiles(
                             receiver_name: user?.Name || "",
                             receiver_email: user.Email,
                             receiver_phone: user?.Phone || "",
+                            receiver_company: user?.Company || "",
+                            receiver_job_title: user?.JobTitle || "",
                             expiry_date: localExpireDate,
                             company_name: orgName,
                             signing_url: signPdf
@@ -1750,7 +1767,10 @@ function PdfRequestFiles(
       const getCurrentUserPlaceholder = signerPos?.find(
         (x) => x.Id === uniqueId
       );
-      const placeholder = getCurrentUserPlaceholder.placeHolder;
+      const placeholder = getCurrentUserPlaceholder?.placeHolder?.filter(
+        (page) => page.pos?.length > 0
+      );
+      if (!placeholder?.length) return;
       //checking minimum pagnumber of existing widgets and throw tour message on that page
       const getPosition = placeholder.reduce(
         (min, obj) => (obj.pageNumber < min.pageNumber ? obj : min),
@@ -1760,7 +1780,7 @@ function PdfRequestFiles(
       setUnSignedWidgetId(getWidgetId);
       setPageNumber(getPosition.pageNumber);
       let pagenumber = [];
-      for (let item of getCurrentUserPlaceholder.placeHolder) {
+      for (let item of placeholder) {
         pagenumber.push(item.pageNumber);
       }
       // Sort the pagenumber in ascending order
@@ -1811,7 +1831,7 @@ function PdfRequestFiles(
             <HandleError handleError={handleError} />
           ) : (
             <div>
-              {!isAgree &&
+              {!hasStartedSigning &&
                 currentSigner &&
                 !isExpired &&
                 !alreadySign &&
@@ -1819,8 +1839,10 @@ function PdfRequestFiles(
                 !isDecline?.isDeclined &&
                   (
                   <AgreementSign
-                    setIsAgree={setIsAgree}
-                    showFirstWidget={showFirstWidget}
+                    onContinue={() => {
+                      setHasStartedSigning(true);
+                      showFirstWidget();
+                    }}
                   />
                 )}
               {isCelebration && (
@@ -1854,7 +1876,7 @@ function PdfRequestFiles(
                   </div>
                 )}
                 {!isReqSignTourDisabled &&
-                  isAgree &&
+                  hasStartedSigning &&
                   signerObjectId &&
                   !alreadySign &&
                   requestSignTourFunction()}
@@ -2142,7 +2164,6 @@ function PdfRequestFiles(
                           scale={scale}
                           uniqueId={uniqueId}
                           pdfBase64Url={pdfBase64Url}
-                          isAgree={isAgree}
                           handleTabDrag={handleTabDrag}
                           handleStop={handleStop}
                           isDragging={isDragging}
@@ -2232,7 +2253,6 @@ function PdfRequestFiles(
                               signatureType?.find((x) => x.name === "default")
                                 ?.enabled || false
                             }
-                            isAgree={isAgree}
                           />
                         )}
                     </div>

@@ -1,10 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getEnv } from "../../constant/Utils";
 import AgreementContent from "./AgreementContent";
 
-function AgreementSign(props) {
+function AgreementSign({ onContinue }) {
   const { t } = useTranslation();
   const [isShowAgreeTerms, setIsShowAgreeTerms] = useState(false);
+  const hasContinued = useRef(false);
+  const consentSetting =
+    getEnv().REACT_APP_SIGNING_CONSENT_ENABLED ||
+    process.env.REACT_APP_SIGNING_CONSENT_ENABLED;
+  const isConsentEnabled =
+    String(consentSetting).trim().toLowerCase() !== "false";
+
+  useEffect(() => {
+    if (!isConsentEnabled && !hasContinued.current) {
+      hasContinued.current = true;
+      onContinue();
+    }
+  }, [isConsentEnabled, onContinue]);
+
+  if (!isConsentEnabled) return null;
 
   return (
     <>
@@ -26,10 +42,7 @@ function AgreementSign(props) {
           </div>
           <div className="flex mt-3">
             <button
-              onClick={() => {
-                props.setIsAgree(true);
-                props.showFirstWidget();
-              }}
+              onClick={onContinue}
               className="op-btn op-btn-primary op-btn-sm w-full md:w-auto"
             >
               {t("agrre-button")}
@@ -42,9 +55,8 @@ function AgreementSign(props) {
       </div>
       {isShowAgreeTerms && (
         <AgreementContent
-          setIsAgree={props.setIsAgree}
+          onContinue={onContinue}
           setIsShowAgreeTerms={setIsShowAgreeTerms}
-          showFirstWidget={props.showFirstWidget}
         />
       )}
     </>

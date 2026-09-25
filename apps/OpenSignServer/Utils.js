@@ -53,10 +53,10 @@ export function replaceMailVaribles(subject, body, variables) {
   for (const variable in variables) {
     const regex = new RegExp(`{{${variable}}}`, 'g');
     if (subject) {
-      replacedSubject = replacedSubject.replace(regex, variables[variable]);
+      replacedSubject = replacedSubject.replace(regex, () => variables[variable]);
     }
     if (body) {
-      replacedBody = replacedBody.replace(regex, variables[variable]);
+      replacedBody = replacedBody.replace(regex, () => variables[variable]);
     }
   }
   const result = { subject: replacedSubject, body: replacedBody };

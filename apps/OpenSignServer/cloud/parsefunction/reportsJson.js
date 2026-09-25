@@ -15,6 +15,8 @@ export default function reportJson(id, currentUserId) {
     'Signers.Name',
     'Signers.Email',
     'Signers.Phone',
+    'Signers.Company',
+    'Signers.JobTitle',
     'Placeholders',
     'TemplateId',
     'ExpiryDate',

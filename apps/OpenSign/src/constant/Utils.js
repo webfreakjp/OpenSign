@@ -2887,10 +2887,10 @@ export function replaceMailVaribles(subject, body, variables) {
   for (const variable in variables) {
     const regex = new RegExp(`{{${variable}}}`, "g");
     if (subject) {
-      replacedSubject = replacedSubject.replace(regex, variables[variable]);
+      replacedSubject = replacedSubject.replace(regex, () => variables[variable]);
     }
     if (body) {
-      replacedBody = replacedBody.replace(regex, variables[variable]);
+      replacedBody = replacedBody.replace(regex, () => variables[variable]);
     }
   }
 
@@ -4666,6 +4666,8 @@ export const sendEmailToSigners = async (
           receiver_name: signerMail[i]?.Name || "",
           receiver_email: signerMail[i].Email,
           receiver_phone: signerMail[i]?.Phone || "",
+          receiver_company: signerMail[i]?.Company || "",
+          receiver_job_title: signerMail[i]?.JobTitle || "",
           expiry_date: localExpireDate,
           company_name: orgName,
           signing_url: signPdf
@@ -4692,6 +4694,8 @@ export const sendEmailToSigners = async (
           receiver_name: signerMail[i]?.Name || "",
           receiver_email: signerMail[i].Email,
           receiver_phone: signerMail[i]?.Phone || "",
+          receiver_company: signerMail[i]?.Company || "",
+          receiver_job_title: signerMail[i]?.JobTitle || "",
           expiry_date: localExpireDate,
           company_name: orgName,
           signing_url: signPdf

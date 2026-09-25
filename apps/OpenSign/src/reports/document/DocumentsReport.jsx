@@ -551,6 +551,8 @@ const DocumentsReport = (props) => {
       receiver_name: userDetails?.Name || "",
       receiver_email: userDetails?.Email,
       receiver_phone: userDetails?.Phone || "",
+      receiver_company: userDetails?.Company || "",
+      receiver_job_title: userDetails?.JobTitle || "",
       expiry_date: localExpireDate,
       company_name: doc.ExtUserPtr.Company,
       signing_url: signPdf
@@ -583,6 +585,8 @@ const DocumentsReport = (props) => {
       receiver_name: userDetails?.Name || "",
       receiver_email: userDetails?.Email || "",
       receiver_phone: userDetails?.Phone || "",
+      receiver_company: userDetails?.Company || "",
+      receiver_job_title: userDetails?.JobTitle || "",
       expiry_date: localExpireDate,
       company_name: doc.ExtUserPtr.Company,
       signing_url: signPdf
@@ -603,6 +607,8 @@ const DocumentsReport = (props) => {
       Name: user?.signerPtr?.Name,
       Email: user.email ? user?.email : user.signerPtr?.Email,
       Phone: user?.signerPtr?.Phone,
+      Company: user?.signerPtr?.Company,
+      JobTitle: user?.signerPtr?.JobTitle,
       objectId: user?.signerPtr?.objectId
     };
     setUserDetails(userdata);
@@ -630,6 +636,8 @@ const DocumentsReport = (props) => {
       receiver_name: user?.signerPtr?.Name || "",
       receiver_email: user?.email ? user?.email : user?.signerPtr?.Email,
       receiver_phone: user?.signerPtr?.Phone || "",
+      receiver_company: user?.signerPtr?.Company || "",
+      receiver_job_title: user?.signerPtr?.JobTitle || "",
       expiry_date: localExpireDate,
       company_name: doc?.ExtUserPtr?.Company || "",
       signing_url: signPdf

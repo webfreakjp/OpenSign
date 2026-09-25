@@ -344,7 +344,7 @@ const MailTemplateEditor = ({
                   {t("subject")}{" "}
                   <Tooltip
                     id={"request-sub-tooltip"}
-                    message={`${t("variables-use")}: {{document_title}} {{sender_name}}, {{sender_mail}}, {{sender_phone}}, {{receiver_name}}, {{receiver_email}}, {{receiver_phone}}, {{expiry_date}}, {{company_name}}, {{signing_url}}, {{note}}`}
+                    message={`${t("variables-use")}: {{document_title}} {{sender_name}}, {{sender_mail}}, {{sender_phone}}, {{receiver_name}}, {{receiver_email}}, {{receiver_phone}}, {{receiver_company}}, {{receiver_job_title}}, {{expiry_date}}, {{company_name}}, {{signing_url}}, {{note}}`}
                   />
                 </label>
                 <input
@@ -361,7 +361,7 @@ const MailTemplateEditor = ({
                     {t("body")}{" "}
                     <Tooltip
                       id={"request-body-tooltip"}
-                      message={`${t("variables-use")}: {{document_title}} {{sender_name}}, {{sender_mail}}, {{sender_phone}}, {{receiver_name}}, {{receiver_email}}, {{receiver_phone}}, {{expiry_date}}, {{company_name}}, {{signing_url}}, {{note}}`}
+                      message={`${t("variables-use")}: {{document_title}} {{sender_name}}, {{sender_mail}}, {{sender_phone}}, {{receiver_name}}, {{receiver_email}}, {{receiver_phone}}, {{receiver_company}}, {{receiver_job_title}}, {{expiry_date}}, {{company_name}}, {{signing_url}}, {{note}}`}
                     />
                   </span>
                   <button

@@ -107,6 +107,8 @@ Please refer to the [Installation Guide](https://docs.opensignlabs.com/docs/self
 
 For comprehensive guidelines on how to use OpenSign™, please consult our [User Manual](USAGE.md).
 
+This fork supports `REACT_APP_SIGNING_CONSENT_ENABLED=false` to skip the electronic record and signature disclosure before recipient signing. The default is `true`. Set it in the client container environment and recreate the container, or in `apps/OpenSign/.env.local` and restart Vite for local development. The container runtime setting does not require rebuilding an image that includes this option. Signing actions and audit records use the existing workflow; skipping the disclosure does not record consent to it. Operators determine whether a separate consent step is required for their transactions.
+
 ---
 
 ### Contribution Guidelines

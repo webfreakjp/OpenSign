@@ -142,6 +142,7 @@ async function sendMail(document, publicUrl) {
         existSigner = document?.Signers?.find(user => user.objectId === objectId);
         encodeBase64 = toBase64(`${document.objectId}/${existSigner?.Email}/${objectId}`);
       } else {
+        existSigner = document?.Signers?.find(user => user.Email === signerMail[i].email) || {};
         encodeBase64 = toBase64(`${document.objectId}/${signerMail[i].email}`);
       }
       let signPdf = `${hostUrl}/login/${encodeBase64}`;
@@ -165,6 +166,8 @@ async function sendMail(document, publicUrl) {
           receiver_name: existSigner?.Name || '',
           receiver_email: existSigner?.Email || signerMail[i].email,
           receiver_phone: existSigner?.Phone || '',
+          receiver_company: existSigner?.Company || '',
+          receiver_job_title: existSigner?.JobTitle || '',
           expiry_date: localExpireDate,
           company_name: orgName,
           signing_url: signPdf,
