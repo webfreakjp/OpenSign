@@ -109,6 +109,8 @@ For comprehensive guidelines on how to use OpenSign™, please consult our [User
 
 This fork supports `REACT_APP_SIGNING_CONSENT_ENABLED=false` to skip the electronic record and signature disclosure before recipient signing. The default is `true`. Set it in the client container environment and recreate the container, or in `apps/OpenSign/.env.local` and restart Vite for local development. The container runtime setting does not require rebuilding an image that includes this option. Signing actions and audit records use the existing workflow; skipping the disclosure does not record consent to it. Operators determine whether a separate consent step is required for their transactions.
 
+Set `EMAIL_REPORT_FOOTER_ENABLED=false` in the server environment to stop appending the OpenSign spam-report notice to outgoing emails. This applies to signature requests, completion/forwarded document emails, and notifications sent through the system mail function, with either SMTP or Mailgun. The default is enabled. After installing a server image that supports this option, recreate the server container to apply environment changes. Content already included in a saved or built-in email template is controlled by that template.
+
 ---
 
 ### Contribution Guidelines
@@ -180,4 +182,3 @@ We would like to thank all our contributors and users for their support and feed
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project is tested with BrowserStack.
-
