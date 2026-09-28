@@ -1615,5 +1615,13 @@
   "access-code-upgrade-msg": "Access codes are available on paid plans only. Upgrade your plan to add access codes for recipients.",
   "show-access-code": "Show access code",
   "hide-access-code": "Hide access code",
-  "already-copied-to-clipboard": "Already copied to clipboard"
+  "already-copied-to-clipboard": "Already copied to clipboard",
+  "operator-notice": "This system is operated by our company using OpenSign. For inquiries, please contact our representative.",
+  "source-code": "Source code",
+  "source-code-description": "This system uses a modified version of OpenSign. You can view and obtain its source code on GitHub.",
+  "source-code-on-github": "View source code on GitHub",
+  "source-code-license": "The source code is available under the GNU Affero General Public License v3.0. See the license for its terms and third-party notices.",
+  "source-code-warranty": "The software is provided without warranty, to the extent permitted by applicable law.",
+  "supported-upload-files": "Select a PDF, PNG or JPEG file. Export Word documents to PDF before uploading.",
+  "encrypted-pdf-unsupported": "Encrypted PDFs are not supported. Remove the password protection before uploading."
 }

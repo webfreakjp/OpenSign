@@ -3,6 +3,7 @@ import Package from "../../package.json";
 import axios from "axios";
 import { openInNewTab } from "../constant/Utils";
 import { useTranslation } from "react-i18next";
+import OperatorNotice from "./OperatorNotice";
 const Footer = () => {
   const appName = "OpenSign™";
   const { t } = useTranslation();
@@ -49,6 +50,7 @@ const Footer = () => {
     <>
       <footer className="op-footer op-footer-center py-3 bg-base-300 text-base-content text-center text-[13px]">
         <aside>
+          <OperatorNotice />
           <p>
             {t("all-right")} &copy; {new Date().getFullYear()} &nbsp;
             <span onClick={openUrl} className="hover:underline cursor-pointer">

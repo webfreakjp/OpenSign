@@ -21,6 +21,8 @@ import { serverUrl_fn } from "./constant/appinfo";
 import DocSuccessPage from "./pages/DocSuccessPage";
 import DragProvider from "./components/DragProivder";
 import Title from "./components/Title";
+import PublicLayout from "./layout/PublicLayout";
+import SourceCode from "./pages/SourceCode";
 const DebugPdf = lazyWithRetry(() => import("./pages/DebugPdf"));
 const ForgetPassword = lazyWithRetry(() => import("./pages/ForgetPassword"));
 const GuestLogin = lazyWithRetry(() => import("./pages/GuestLogin"));
@@ -65,36 +67,39 @@ function App() {
         <BrowserRouter>
           <Title />
           <Routes>
-            <Route element={<ValidateRoute />}>
-              <Route exact path="/" element={<Lazy Page={Login} />} />
-                  <Route path="/addadmin" element={<Lazy Page={AddAdmin} />} />
-                  <Route
-                    path="/upgrade-2.1"
-                    element={<Lazy Page={UpdateExistUserAdmin} />}
-                  />
-            </Route>
-            <Route element={<Validate />}>
+            <Route element={<PublicLayout />}>
+              <Route path="/github" element={<SourceCode />} />
+              <Route element={<ValidateRoute />}>
+                <Route exact path="/" element={<Lazy Page={Login} />} />
+                <Route path="/addadmin" element={<Lazy Page={AddAdmin} />} />
+                <Route
+                  path="/upgrade-2.1"
+                  element={<Lazy Page={UpdateExistUserAdmin} />}
+                />
+              </Route>
+              <Route element={<Validate />}>
+                <Route
+                  exact
+                  path="/load/recipientSignPdf/:docId/:contactBookId"
+                  element={<DragProvider Page={PdfRequestFiles} />}
+                />
+              </Route>
               <Route
-                exact
-                path="/load/recipientSignPdf/:docId/:contactBookId"
-                element={<DragProvider Page={PdfRequestFiles} />}
+                path="/login/:base64url"
+                element={<Lazy Page={GuestLogin} />}
               />
-            </Route>
-            <Route
-              path="/login/:base64url"
-              element={<Lazy Page={GuestLogin} />}
-            />
-            <Route path="/debugpdf" element={<Lazy Page={DebugPdf} />} />
+              <Route path="/debugpdf" element={<Lazy Page={DebugPdf} />} />
               <Route
                 path="/forgetpassword"
                 element={<Lazy Page={ForgetPassword} />}
               />
+            </Route>
             <Route element={<HomeLayout />}>
-                  <Route path="/users" element={<UserList />} />
-                  <Route
-                    path="/changepassword"
-                    element={<Lazy Page={ChangePassword} />}
-                  />
+              <Route path="/users" element={<UserList />} />
+              <Route
+                path="/changepassword"
+                element={<Lazy Page={ChangePassword} />}
+              />
               <Route path="/form/:id" element={<Form />} />
               <Route path="/report/:id" element={<Report />} />
               <Route path="/dashboard/:id" element={<Dashboard />} />
@@ -138,9 +143,11 @@ function App() {
                 element={<Lazy Page={Preferences} />}
               />
             </Route>
-            <Route path="/success" element={<DocSuccessPage />} />
+            <Route element={<PublicLayout />}>
+              <Route path="/success" element={<DocSuccessPage />} />
+              <Route path="*" element={<PageNotFound />} />
+            </Route>
             <Route path="/emailbuilder" element={<EmailBuilder />} />
-            <Route path="*" element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>
       )}

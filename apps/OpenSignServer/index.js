@@ -11,7 +11,6 @@ import Mailgun from 'mailgun.js';
 import { ApiPayloadConverter } from 'parse-server-api-mail-adapter';
 import S3Adapter from '@parse/s3-files-adapter';
 import FSFilesAdapter from '@parse/fs-files-adapter';
-import { app as customRoute } from './cloud/customRoute/customApp.js';
 import { exec } from 'child_process';
 import { createTransport } from 'nodemailer';
 import { appName, cloudServerUrl, serverAppId, smtpenable, smtpsecure, useLocal } from './Utils.js';
@@ -225,9 +224,6 @@ if (!process.env.TESTING) {
     process.exit();
   }
 }
-// Mount your custom express app
-app.use('/', customRoute);
-
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function (req, res) {
   res.status(200).send('opensign-server is running !!!');

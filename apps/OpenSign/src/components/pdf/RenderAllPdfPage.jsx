@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { PDFDocument } from "pdf-lib";
 import {
   base64ToArrayBuffer,
-  decryptPdf,
   getFileAsArrayBuffer
 } from "../../constant/Utils";
 import { maxFileSize } from "../../constant/const";
@@ -100,47 +99,7 @@ function RenderAllPdfPage(props) {
     try {
       let uploadedPdfBytes = await getFileAsArrayBuffer(file);
       await isPdfPasswordProtected(uploadedPdfBytes);
-      try {
-        uploadedPdfBytes = await clearAcroFields(uploadedPdfBytes); // best effort cleanup to prevent stale data
-      } catch (error) {
-        console.error("Error merging PDF:", error);
-        if (error?.message?.includes("is encrypted")) {
-          try {
-            const pdfFile = await decryptPdf(file, "");
-            const pdfArrayBuffer = await getFileAsArrayBuffer(pdfFile);
-            uploadedPdfBytes = await clearAcroFields(pdfArrayBuffer);
-          } catch (err) {
-            if (err?.response?.status === 401) {
-              const password = prompt(
-                `PDF "${file.name}" is password-protected. Enter password:`
-              );
-              if (password) {
-                try {
-                  const pdfFile = await decryptPdf(file, password);
-                  const pdfArrayBuffer = await getFileAsArrayBuffer(pdfFile);
-                  uploadedPdfBytes = await clearAcroFields(pdfArrayBuffer);
-                  // Upload the file to Parse Server
-                } catch (err) {
-                  console.error("Incorrect password or decryption failed", err);
-                  alert(t("incorrect-password-or-decryption-failed"));
-                  return;
-                }
-              } else {
-                alert(t("provide-password"));
-                return;
-              }
-            } else {
-              console.error("Decryption error ", error);
-              alert(t("error-uploading-pdf"));
-              return;
-            }
-          }
-        } else {
-          console.error("File upload error ", error);
-          alert(t("error-uploading-pdf"));
-          return;
-        }
-      }
+      uploadedPdfBytes = await clearAcroFields(uploadedPdfBytes);
       const uploadedPdfDoc = await PDFDocument.load(uploadedPdfBytes, {
         ignoreEncryption: true
       });
@@ -171,6 +130,11 @@ function RenderAllPdfPage(props) {
     } catch (error) {
       mergePdfInputRef.current.value = "";
       console.error("Error merging PDF:", error);
+      alert(
+        t(error?.message?.includes("is encrypted")
+          ? "encrypted-pdf-unsupported"
+          : "error-uploading-pdf")
+      );
     }
   };
   return (

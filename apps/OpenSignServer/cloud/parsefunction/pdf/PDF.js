@@ -11,8 +11,7 @@ import {
   serverAppId,
 } from '../../../Utils.js';
 import GenerateCertificate from './GenerateCertificate.js';
-import { pdflibAddPlaceholder } from '@signpdf/placeholder-pdf-lib';
-import { Placeholder } from './Placeholder.js';
+import addSignaturePlaceholder from './addSignaturePlaceholder.js';
 import { SignPdf } from '@signpdf/signpdf';
 import { P12Signer } from '@signpdf/signer-p12';
 import { buildDownloadFilename, parseUploadFile } from '../../../utils/fileUtils.js';
@@ -37,8 +36,6 @@ import {
 const serverUrl = cloudServerUrl; // process.env.SERVER_URL;
 const APPID = serverAppId;
 const masterKEY = process.env.MASTER_KEY;
-const eSignName = 'OpenSign';
-const eSigncontact = 'hello@opensignlabs.com';
 const docUrl = `${serverUrl}/classes/contracts_Document`;
 const headers = {
   'Content-Type': 'application/json',
@@ -315,15 +312,7 @@ async function sendMailsaveCertifcate(doc, pfx, isCustomMail, mailProvider, file
   const certificatePdf = await PDFDocument.load(certificate);
   const P12Buffer = fs.readFileSync(pfx.name);
   const p12 = new P12Signer(P12Buffer, { passphrase: pfx.passphrase || null });
-  //  `pdflibAddPlaceholder` is used to add code of only digitial sign in certificate
-  pdflibAddPlaceholder({
-    pdfDoc: certificatePdf,
-    reason: `Digitally signed by ${eSignName}.`,
-    location: 'n/a',
-    name: eSignName,
-    contactInfo: eSigncontact,
-    signatureLength: 16000,
-  });
+  addSignaturePlaceholder(certificatePdf);
   const pdfWithPlaceholderBytes = await certificatePdf.save();
   const CertificateBuffer = Buffer.from(pdfWithPlaceholderBytes);
   //`new signPDF` create new instance of CertificateBuffer and p12Buffer
@@ -351,7 +340,7 @@ async function sendMailsaveCertifcate(doc, pfx, isCustomMail, mailProvider, file
 /**
  * Process a PDF for signing:
  * - updates audit trail, generates certificate.
- * - Optionally inserts a signature placeholder (Placeholder()).
+ * - Inserts a signature placeholder with the configured service identity.
  * - Otherwise (no merge + no placeholder), it flattens forms for finalization.
  *
  * @param {Object} _resDoc - Document details (expects AuditTrail, etc.)
@@ -370,14 +359,7 @@ async function processPdf(_resDoc, PdfBuffer, reason) {
   form.updateFieldAppearances();
   // Flattens the form, converting all form fields into non-editable, static content
   form.flatten();
-  Placeholder({
-    pdfDoc: pdfDoc,
-    reason: `Digitally signed by ${eSignName} for ${reason}`,
-    location: 'n/a',
-    name: eSignName,
-    contactInfo: eSigncontact,
-    signatureLength: 16000,
-  });
+  addSignaturePlaceholder(pdfDoc, reason);
   const pdfWithPlaceholderBytes = await pdfDoc.save();
   return Buffer.from(pdfWithPlaceholderBytes);
 }

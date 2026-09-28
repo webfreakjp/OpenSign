@@ -335,7 +335,8 @@ export default async function GenerateCertificate(docDetails) {
   // bottom edge sits at yPosition7 - 30 and must remain inside the page
   // border (whose bottom edge is at startY). Use the lowest of those two
   // values when deciding whether the next block fits on the current page.
-  const minY = startY + 5;
+  // Reserve space for the operator notice on every page.
+  const minY = startY + 45;
   const blockBottom = () => Math.min(yPosition7 - 30, yPosition8);
 
   // Helper that resets the y-positions to the top of a freshly added page so
@@ -512,6 +513,21 @@ export default async function GenerateCertificate(docDetails) {
     yPosition8 = yPosition8 - 174;
   }
 
+  for (const certificatePage of pdfDoc.getPages()) {
+    const noticeLines = [
+      '本システムは、当社がOpenSignを利用して運営しています。',
+      'お問い合わせは当社の担当者までお願いいたします。',
+    ];
+    noticeLines.forEach((line, index) => {
+      certificatePage.drawText(line, {
+        x: 30,
+        y: 38 - index * 12,
+        size: 8,
+        font: japaneseFont,
+        color: textValueColor,
+      });
+    });
+  }
   const pdfBytes = await pdfDoc.save();
   return pdfBytes;
 }

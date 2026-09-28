@@ -10,8 +10,6 @@ import AddUser from "../components/AddUser";
 import {
   useTranslation
 } from "react-i18next";
-import DeleteUserModal from "../primitives/DeleteUserModal";
-import axios from "axios";
 import PasswordResetModal from "../primitives/PasswordResetModal";
 import { usersActions } from "../json/ReportJson";
 import { withSessionValidation } from "../utils";
@@ -35,8 +33,6 @@ const UserList = () => {
   const [isActLoader, setIsActLoader] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [formHeader, setFormHeader] = useState(t("add-user"));
-  const [deleteUserRes, setDeleteUserRes] = useState("");
-  const [deleting, setDeleting] = useState(false);
   const [isActModal, setIsActModal] = useState({});
   const Extand_Class = localStorage.getItem("Extand_Class");
   const extClass = Extand_Class && JSON.parse(Extand_Class);
@@ -205,37 +201,8 @@ const UserList = () => {
     setTimeout(() => setIsAlert({ type: "success", msg: "" }), timer);
   };
 
-  const handleDeleteAccount = withSessionValidation(async (item) => {
-    setDeleting(true);
-    if (item?.UserId?.objectId) {
-      const url = localStorage.getItem("baseUrl")?.replace(/\/app\/?$/, "/");
-      const deleteUrl = `${url}deleteuser/${item.UserId.objectId}`;
-      try {
-        await axios.post(deleteUrl, null, {
-          headers: { sessiontoken: localStorage.getItem("accesstoken") }
-        });
-        setUserList((prev) =>
-          prev.filter((user) => user.objectId !== item.objectId)
-        );
-        showAlert("success", t("user-deleted-successfully"));
-      } catch (err) {
-        const message = err?.response?.data?.message || err?.message;
-        setDeleteUserRes(message);
-        showAlert("danger", message);
-        console.log("Err in deleteuser acc", err);
-      } finally {
-        setDeleting(false);
-      }
-    } else {
-      showAlert("danger", t("something-went-wrong-mssg"));
-      setDeleteUserRes(t("something-went-wrong-mssg"));
-      setDeleting(false);
-    }
-  });
   const handleCloseModal = () => {
     setIsActModal({});
-    setDeleteUserRes("");
-    setDeleting(false);
   };
 
   const handleActionBtn = withSessionValidation(async (act, item) => {
@@ -446,15 +413,6 @@ const UserList = () => {
                                   </div>
                                 </td>
                               )}
-                              <DeleteUserModal
-                                title={t("delete-account")}
-                                deleting={deleting}
-                                userEmail={item?.Email}
-                                isOpen={isActModal["delete_" + item.objectId]}
-                                onConfirm={() => handleDeleteAccount(item)}
-                                deleteRes={deleteUserRes}
-                                handleClose={handleCloseModal}
-                              />
                               <PasswordResetModal
                                 isOpen={
                                   isActModal["resetpassword_" + item.objectId]

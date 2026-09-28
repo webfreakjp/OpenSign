@@ -1,6 +1,6 @@
 import { SignPdf } from '@signpdf/signpdf';
 import { P12Signer } from '@signpdf/signer-p12';
-import { pdflibAddPlaceholder } from '@signpdf/placeholder-pdf-lib';
+import addSignaturePlaceholder from './pdf/addSignaturePlaceholder.js';
 import { PDFDocument } from 'pdf-lib';
 import fs from 'node:fs';
 import dotenv from 'dotenv';
@@ -8,8 +8,6 @@ import GenerateCertificate from './pdf/GenerateCertificate.js';
 import { getSecureUrl } from '../../Utils.js';
 import { parseUploadFile } from '../../utils/fileUtils.js';
 dotenv.config({ quiet: true });
-const eSignName = 'OpenSign';
-const eSigncontact = 'hello@opensignlabs.com';
 
 // `uploadFile` is used to create url in from pdfFile
 async function uploadFile(pdfName, filepath) {
@@ -66,15 +64,7 @@ export default async function generateCertificatebydocId(req) {
       const certificate = await GenerateCertificate(doc);
       const certificatePdf = await PDFDocument.load(certificate);
       const p12 = new P12Signer(P12Buffer, { passphrase: process.env.PASS_PHRASE || null });
-      //  `pdflibAddPlaceholder` is used to add code of only digital sign in certificate
-      pdflibAddPlaceholder({
-        pdfDoc: certificatePdf,
-        reason: `Digitally signed by ${eSignName}.`,
-        location: 'n/a',
-        name: eSignName,
-        contactInfo: eSigncontact,
-        signatureLength: 16000,
-      });
+      addSignaturePlaceholder(certificatePdf);
       const pdfWithPlaceholderBytes = await certificatePdf.save();
       const CertificateBuffer = Buffer.from(pdfWithPlaceholderBytes);
       //`new signPDF` create new instance of CertificateBuffer and p12Buffer

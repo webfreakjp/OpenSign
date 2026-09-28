@@ -41,6 +41,7 @@ const TITLE_MAP = {
   "/upgrade-2.1": "add-admin",
   "/draftDocument": "New Document",
   "/login/:base64url": "Request Signatures",
+  "/github": "source-code",
 
 };
 

@@ -12,20 +12,15 @@ import {
   generateTitleFromFilename,
   getSecureUrl,
   toDataUrl,
-  decryptPdf,
-  base64ToFile,
-  getFileAsArrayBuffer,
-  removeTrailingSegment
+  getFileAsArrayBuffer
 } from "../constant/Utils";
 import { PDFDocument } from "pdf-lib";
-import axios from "axios";
 import {
   maxFileSize,
   maxDescriptionLength,
   maxNoteLength,
   maxTitleLength
 } from "../constant/const";
-import ModalUi from "../primitives/ModalUi";
 import { Tooltip } from "react-tooltip";
 import Loader from "../primitives/Loader";
 import { useTranslation } from "react-i18next";
@@ -53,7 +48,6 @@ const Forms = (props) => {
   const appName =
     "OpenSign™";
   const { t } = useTranslation();
-  const abortController = new AbortController();
   const inputFileRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -66,8 +60,6 @@ const Forms = (props) => {
     TimeToCompleteDays: 15,
     SendinOrder: "false",
     SendInOrderStrict: "false",
-    password: "",
-    file: "",
     remindOnceInEvery: 5,
     autoreminder: false,
     IsEnableOTP: "false",
@@ -86,9 +78,6 @@ const Forms = (props) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAlert, setIsAlert] = useState({ type: "success", message: "" });
   const [isSubmit, setIsSubmit] = useState(false);
-  const [isPassword, setIsPassword] = useState(false);
-  const [isDecrypting, setIsDecrypting] = useState(false);
-  const [isCorrectPass, setIsCorrectPass] = useState(true);
   const [isAdvanceOpt, setIsAdvanceOpt] = useState(false);
   const [bcc, setBcc] = useState([]);
   const [cc, setCc] = useState([]);
@@ -116,7 +105,6 @@ const Forms = (props) => {
     maxFileSize;
   useEffect(() => {
     handleReset();
-    return () => abortController.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.title]);
 
@@ -155,7 +143,14 @@ const Forms = (props) => {
         alert(t("file-alert-2"));
         return;
       }
-      // setFormData((prev) => ({ ...prev, file: files[0] }));
+      const supportedTypes = ["application/pdf", "image/png", "image/jpeg"];
+      if (files.some((file) => !supportedTypes.includes(file.type))) {
+        alert(t("supported-upload-files"));
+        setFileUpload("");
+        setSelectedFiles([]);
+        removeFile(e);
+        return;
+      }
       const totalBytes = Math.round(files.reduce((sum, f) => sum + f.size, 0)); // in bytes
       const fileSizeBytes = fileSize * 1024 * 1024;
       if (totalBytes > fileSizeBytes) {
@@ -168,78 +163,11 @@ const Forms = (props) => {
 
       const pdfBuffers = [];
       for (const file of files) {
-        setFormData((prev) => ({ ...prev, file: file }));
         if (file.type === "application/pdf") {
-          try {
-            const buffer = await getFileAsArrayBuffer(file);
-            await isPdfPasswordProtected(buffer);
-            const newBuffer = await clearAcroFields(buffer); // best effort cleanup to prevent stale data
-            pdfBuffers.push(newBuffer);
-          } catch (err) {
-            if (err?.message?.includes("is encrypted")) {
-              try {
-                setIsDecrypting(true);
-                const pdfFile = await decryptPdf(file, "");
-                setIsDecrypting(false);
-                setfileload(true);
-                const res = await getFileAsArrayBuffer(pdfFile);
-                const newBuffer = await clearAcroFields(res); // best effort cleanup to prevent stale data
-                pdfBuffers.push(newBuffer);
-              } catch (err) {
-                removeFile(e);
-                if (err?.response?.status === 401) {
-                  const password = prompt(
-                    `PDF "${file.name}" is password-protected. Enter password:`
-                  );
-
-                  if (password) {
-                    try {
-                      const pdfFile = await decryptPdf(file, password);
-                      setIsDecrypting(false);
-                      setfileload(true);
-                      const res = await getFileAsArrayBuffer(pdfFile);
-                      const newBuffer = await clearAcroFields(res); // best effort cleanup to prevent stale data
-                      pdfBuffers.push(newBuffer);
-                    } catch (err) {
-                      console.error(
-                        "Incorrect password or decryption failed",
-                        err
-                      );
-                      setSelectedFiles(
-                        filesNameArr.filter((f) => f !== file.name)
-                      );
-                      setIsDecrypting(false);
-                      setfileload(false);
-                      removeFile(e);
-                      alert(
-                        t("incorrect-password-for-file", { file: file.name })
-                      );
-                      return;
-                    }
-                  } else {
-                    console.error("Password not provided");
-                    setSelectedFiles(
-                      filesNameArr.filter((f) => f !== file.name)
-                    );
-                    setIsDecrypting(false);
-                    setfileload(false);
-                    removeFile(e);
-                    return;
-                  }
-                } else {
-                  console.error("File upload error: ", err?.response);
-                  setIsDecrypting(false);
-                  e.target.value = "";
-                  removeFile(e);
-                  return;
-                }
-              }
-            } else {
-              console.error("File upload error: ", err);
-              removeFile(e);
-              return;
-            }
-          }
+          const buffer = await getFileAsArrayBuffer(file);
+          await isPdfPasswordProtected(buffer);
+          const newBuffer = await clearAcroFields(buffer);
+          pdfBuffers.push(newBuffer);
         } else if (file.type.includes("image/")) {
           const image = await toDataUrl(file);
           const pdfDoc = await PDFDocument.create();
@@ -256,54 +184,6 @@ const Forms = (props) => {
           });
           const bytes = await pdfDoc.save({ useObjectStreams: false });
           pdfBuffers.push(bytes);
-        } else if (
-          file.type ===
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-          file.name.toLowerCase().endsWith(".docx")
-        ) {
-          try {
-            const baseApi = localStorage.getItem("baseUrl") || "";
-            const url = removeTrailingSegment(baseApi) + "/docxtopdf";
-            let fd = new FormData();
-            fd.append("file", file);
-            setfileload(true);
-            setpercentage(0);
-            const config = {
-              headers: {
-                "content-type": "multipart/form-data",
-                sessiontoken: Parse.User.current().getSessionToken()
-              },
-              signal: abortController.signal,
-              onUploadProgress: (progressEvent) => {
-                if (progressEvent.total) {
-                  const percentCompleted = Math.round(
-                    (progressEvent.loaded * 100) / progressEvent.total
-                  );
-                  setpercentage(percentCompleted);
-                }
-              }
-            };
-            const res = await axios.post(url, fd, config);
-            if (res.data?.url) {
-              const pdfRes = await axios.get(res.data.url, {
-                responseType: "arraybuffer"
-              });
-              pdfBuffers.push(pdfRes.data);
-            }
-            setfileload(false);
-          } catch (err) {
-            setfileload(false);
-            removeFile(e);
-            console.error("Docx to PDF conversion error: ", err);
-            const error =
-                  t("docx-error");
-            if (err?.code === 209) {
-              dispatch(sessionStatus(false));
-            } else {
-              alert(error);
-            }
-            return;
-          }
         }
       }
 
@@ -363,8 +243,13 @@ const Forms = (props) => {
       if (error?.code === 209) {
         dispatch(sessionStatus(false));
       } else {
-        alert(error.message);
+        alert(
+          t(error?.message?.includes("is encrypted")
+            ? "encrypted-pdf-unsupported"
+            : "error-uploading-pdf")
+        );
       }
+      setFileUpload("");
       setSelectedFiles([]);
       removeFile(e);
     }
@@ -515,8 +400,6 @@ const Forms = (props) => {
                 : "Please review and sign this document",
             TimeToCompleteDays: 15,
             SendinOrder: sendinorder,
-            password: "",
-            file: "",
             NotifyOnSignatures: notifyOnSignatures,
             remindOnceInEvery: 5,
             autoreminder: false,
@@ -605,8 +488,6 @@ const Forms = (props) => {
           : "Please review and sign this document",
       TimeToCompleteDays: 15,
       SendinOrder: sendinorder,
-      password: "",
-      file: "",
       remindOnceInEvery: 5,
       autoreminder: false,
       IsEnableOTP: "false",
@@ -624,86 +505,6 @@ const Forms = (props) => {
   const handleCancel = () => {
     navigate("/dashboard/35KBoSgoAK");
   };
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
-    setIsPassword(false);
-    setfileload(true);
-    const tenantId = localStorage.getItem("TenantId");
-    const userId = extUserData?.UserId?.objectId;
-    try {
-      const size = formData?.file?.size;
-      const name = generatePdfName(16);
-      const pdfFile = await decryptPdf(formData?.file, formData?.password);
-      setIsDecrypting(false);
-        const res = await getFileAsArrayBuffer(pdfFile);
-        const newArraybuffer = await clearAcroFields(res); // best effort cleanup to prevent stale data
-        const pdfToSave = new Uint8Array(newArraybuffer);
-        const parseFile = new Parse.File(
-          name,
-          [...pdfToSave],
-          "application/pdf"
-        );
-        await parseFile.save({
-          progress: (progressValue, loaded, total) => {
-            if (progressValue !== null) {
-              const percentCompleted = Math.round((loaded * 100) / total);
-              setpercentage(percentCompleted);
-            }
-          }
-        });
-        // Retrieve the URL of the uploaded file
-        if (parseFile.url()) {
-          const fileRes = await getSecureUrl(parseFile.url());
-          if (fileRes.url) {
-            setFileUpload(fileRes.url);
-            removeFile();
-            const title = generateTitleFromFilename(formData?.file?.name);
-            setFormData((obj) => ({ ...obj, password: "", Name: title }));
-            SaveFileSize(size, fileRes?.url, tenantId, userId);
-            return fileRes.url;
-          } else {
-            removeFile();
-            setFormData((prev) => ({ ...prev, password: "" }));
-            setIsDecrypting(false);
-            if (inputFileRef.current) {
-              inputFileRef.current.value = ""; // Set file input value to empty string
-            }
-          }
-        } else {
-          removeFile();
-          setFormData((prev) => ({ ...prev, password: "" }));
-          setIsDecrypting(false);
-          if (inputFileRef.current) {
-            inputFileRef.current.value = ""; // Set file input value to empty string
-          }
-        }
-    } catch (err) {
-      removeFile();
-      if (err?.code === 209) {
-        dispatch(sessionStatus(false));
-      } else if (err?.response?.status === 401) {
-        setIsPassword(true);
-        setIsCorrectPass(false);
-      } else {
-        console.error("File upload error: ", err?.response);
-        setFormData((prev) => ({ ...prev, password: "" }));
-        setIsDecrypting(false);
-        if (inputFileRef.current) {
-          inputFileRef.current.value = ""; // Set file input value to empty string
-        }
-      }
-    }
-  };
-  const handeCloseModal = () => {
-    setIsPassword(false);
-    setFormData((prev) => ({ ...prev, file: "", password: "" }));
-    setIsDecrypting(false);
-    setfileload(false);
-    if (inputFileRef.current) {
-      inputFileRef.current.value = ""; // Set file input value to empty string
-    }
-  };
-
   // `handleNotifySignChange` is trigger when user change radio of notify on signatures
   const handleNotifySignChange = (value) => {
     setFormData((obj) => ({ ...obj, NotifyOnSignatures: value }));
@@ -742,46 +543,6 @@ const Forms = (props) => {
         </div>
       ) : (
         <>
-          <ModalUi
-            isOpen={isPassword}
-            handleClose={() => handeCloseModal()}
-            title={t("enter-pdf-password")}
-          >
-            <form onSubmit={handlePasswordSubmit}>
-              <div className="px-6 pt-3 pb-2">
-                <label className="mb-2 text-xs text-base-content">
-                  {t("password")}
-                </label>
-                <input
-                  type="text"
-                  name="password"
-                  value={formData.password}
-                  onChange={(e) => handleStrInput(e)}
-                  className="w-full op-input op-input-bordered op-input-sm focus:outline-none hover:border-base-content text-xs"
-                  placeholder={t("enter-pdf-password")}
-                  onInvalid={(e) =>
-                    e.target.setCustomValidity(t("input-required"))
-                  }
-                  onInput={(e) => e.target.setCustomValidity("")}
-                  required
-                />
-                <p
-                  className={`${
-                    !isCorrectPass
-                      ? "text-red-600"
-                      : "text-transparent pointer-events-none"
-                  } ml-2 text-[11px] `}
-                >
-                  {t("correct-password")}
-                </p>
-              </div>
-              <div className="px-6 mb-3">
-                <button type="submit" className="op-btn op-btn-primary">
-                  {t("submit")}
-                </button>
-              </div>
-            </form>
-          </ModalUi>
           <form onSubmit={handleSubmit}>
             <div className="mb-[11px]">
               <h1 className="text-[20px] font-semibold">{t(props?.title)}</h1>
@@ -812,16 +573,9 @@ const Forms = (props) => {
                 <span className="text-base-content text-sm">{percentage}%</span>
               </div>
             )}
-            {isDecrypting && (
-              <div className="flex items-center gap-x-2">
-                <span className="text-base-content text-sm">
-                  {t("decrypting-pdf")}
-                </span>
-              </div>
-            )}
             <div className="text-xs">
               <label className="block">
-                {`${`${t("report-heading.File")} (${t("file-type")}`}${", docx)"}`}
+                {`${t("report-heading.File")} (${t("file-type")})`}
                 <span className="text-red-500 text-[13px]">*</span>
               </label>
               {fileupload.length > 0 ? (
@@ -849,7 +603,7 @@ const Forms = (props) => {
                     className="op-file-input op-file-input-bordered op-file-input-sm focus:outline-none hover:border-base-content w-full text-xs"
                     onChange={(e) => handleFileInput(e)}
                     ref={inputFileRef}
-                    accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg"
+                    accept="application/pdf,image/png,image/jpeg"
                     onInvalid={(e) =>
                       e.target.setCustomValidity(t("input-required"))
                     }

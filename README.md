@@ -33,13 +33,18 @@
 
 ### Table of Contents
 
-1. [Introduction](#introduction)
-2. [Features](#features)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Contribution Guidelines](#contribution-guidelines)
-6. [License](#license)
-7. [Acknowledgments](#acknowledgments)
+- [The premier open source document signing solution(DocuSign alternative)](#the-premier-open-source-document-signing-solutiondocusign-alternative)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Features](#features)
+  - [Deploy](#deploy)
+    - [DigitalOcean](#digitalocean)
+    - [Docker](#docker)
+  - [Usage](#usage)
+  - [Contribution Guidelines](#contribution-guidelines)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
+- [Contributors](#contributors)
 
 ---
 Please star ⭐ the repo to support us! 😀
@@ -110,6 +115,14 @@ For comprehensive guidelines on how to use OpenSign™, please consult our [User
 This fork supports `REACT_APP_SIGNING_CONSENT_ENABLED=false` to skip the electronic record and signature disclosure before recipient signing. The default is `true`. Set it in the client container environment and recreate the container, or in `apps/OpenSign/.env.local` and restart Vite for local development. The container runtime setting does not require rebuilding an image that includes this option. Signing actions and audit records use the existing workflow; skipping the disclosure does not record consent to it. Operators determine whether a separate consent step is required for their transactions.
 
 Set `EMAIL_REPORT_FOOTER_ENABLED=false` in the server environment to stop appending the OpenSign spam-report notice to outgoing emails. This applies to signature requests, completion/forwarded document emails, and notifications sent through the system mail function, with either SMTP or Mailgun. The default is enabled. After installing a server image that supports this option, recreate the server container to apply environment changes. Content already included in a saved or built-in email template is controlled by that template.
+
+This fork displays an operator notice in the login, recipient signing and application footers, and on each page of newly generated completion certificates. Existing signed PDFs are not rewritten.
+
+Set `PDF_SIGNER_NAME` and `PDF_SIGNER_CONTACT` in the server environment to configure the PDF signature display name and contact information. These apply to newly signed documents and completion certificates, including certificates generated later. Japanese names are supported. Unset or whitespace-only values retain `OpenSign` and `hello@opensignlabs.com`, respectively. After installing a server image that supports these options, recreate the server container to apply environment changes. These fields do not change the subject of the certificate inside `PFX_BASE64`; reissue that certificate separately. Normal administrator/tenant creation does not populate `partners_Tenant.PfxFile`. If that field was provisioned separately, normal document signing prefers it over the environment PFX; the later certificate-generation path uses the environment PFX.
+
+The public `/github` page links to the source of this fork on the `ja-self-host` branch and its license. It requires no login and has no navigation link. A direct-access page alone does not complete AGPL section 13's source-offer requirement: operators must also prominently offer access to the corresponding source and publish the version they deploy.
+
+The separately licensed `apps/OpenSignServer/cloud/customRoute` directory is excluded from this fork. Ordinary PDF signing, completion certificates and PNG/JPEG uploads remain supported. DOCX conversion, encrypted-PDF decryption, and self-service/admin account deletion are unavailable; their controls and endpoints have been removed. Export Word documents as PDF and remove PDF password protection before uploading. User deactivation and password resets remain available. The upstream license notices are retained.
 
 ---
 

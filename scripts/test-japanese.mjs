@@ -124,9 +124,15 @@ test("Upstream certificate layout retains Japanese names and the full document h
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
+    const pageText = content.items.map((item) => item.str || "").join("");
+    assert.ok(pageText.includes("本システムは、当社がOpenSignを利用して運営しています。"));
+    assert.ok(pageText.includes("お問い合わせは当社の担当者までお願いいたします。"));
     for (const item of content.items) {
       if (!("str" in item)) continue;
       text += item.str;
+      if (item.str && !item.str.startsWith("本システムは") && !item.str.startsWith("お問い合わせは")) {
+        assert.ok(item.transform[5] >= 60, `overlaps operator notice: ${item.str}`);
+      }
       assert.ok(
         item.transform[4] >= 15 &&
           item.transform[4] + item.width <= page.view[2] - 15,

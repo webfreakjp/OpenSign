@@ -4515,29 +4515,6 @@ export const handleCheckResponse = (checkUser, setminRequiredCount) => {
 };
 
 /**
- * decryptPdf
- * @param {File} file - The password-protected PDF file to decrypt.
- * @param {string | undefined} password - The password used to unlock the PDF.
- * @returns {Promise<File>} - A Promise that resolves to a decrypted PDF as a File object.
- *
- */
-export const decryptPdf = async (file, password) => {
-  const name = generatePdfName(16);
-  const baseApi = localStorage.getItem("baseUrl") || "";
-  const url = removeTrailingSegment(baseApi) + "/decryptpdf?ts=" + Date.now();
-  let formData = new FormData();
-  formData.append("file", file);
-  formData.append("password", password);
-  const config = {
-    headers: { "content-type": "multipart/form-data" },
-    responseType: "blob"
-  };
-  const response = await axios.post(url, formData, config);
-  const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-  return new File([pdfBlob], name, { type: "application/pdf" });
-};
-
-/**
  * Convert a Base64 string to a File object.
  *
  * @param {string} base64String - The Base64 string, with or without the data URI prefix.

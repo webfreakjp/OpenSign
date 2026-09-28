@@ -1615,5 +1615,13 @@
   "access-code-upgrade-msg": "アクセスコードは有料プランで利用できます。利用するにはプランをアップグレードしてください。",
   "show-access-code": "アクセスコードを表示",
   "hide-access-code": "アクセスコードを隠す",
-  "already-copied-to-clipboard": "コピー済みです"
+  "already-copied-to-clipboard": "コピー済みです",
+  "operator-notice": "本システムは、当社がOpenSignを利用して運営しています。お問い合わせは当社の担当者までお願いいたします。",
+  "source-code": "ソースコード",
+  "source-code-description": "本システムはOpenSignの改変版を使用しています。ソースコードはGitHubから閲覧・取得できます。",
+  "source-code-on-github": "GitHubでソースコードを見る",
+  "source-code-license": "ソースコードはGNU Affero General Public License v3.0に基づいて提供されています。利用条件や第三者の権利に関する表記はライセンスをご確認ください。",
+  "source-code-warranty": "ソフトウェアは、適用法で認められる範囲で無保証で提供されています。",
+  "supported-upload-files": "PDF、PNG、JPEGファイルを選択してください。Word文書はPDFに変換してからアップロードしてください。",
+  "encrypted-pdf-unsupported": "暗号化されたPDFには対応していません。パスワード保護を解除してからアップロードしてください。"
 }

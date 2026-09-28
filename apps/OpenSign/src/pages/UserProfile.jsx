@@ -49,9 +49,6 @@ function UserProfile() {
   const [otp, setOtp] = useState("");
   const [otpLoader, setOtpLoader] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [isdeleteModal, setIsdeleteModal] = useState(false);
-  const [deleteUserRes, setDeleteUserRes] = useState("");
-  const [isDelLoader, setIsDelLoader] = useState(false);
   useEffect(() => {
     getUserDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -266,35 +263,6 @@ function UserProfile() {
     setJobTitle(extendUser?.[0]?.JobTitle);
   };
 
-  const handleDeleteAccountBtn = () => {
-    const isAdmin = extendUser?.[0]?.UserRole === "contracts_Admin";
-    if (!isAdmin) {
-      setDeleteUserRes(t("delete-action-prohibited"));
-    }
-    setIsdeleteModal(true);
-  };
-
-  const handleDeleteAccount = async (e) => {
-    e.preventDefault();
-    setIsDelLoader(true);
-    try {
-      await Parse.Cloud.run("senddeleterequest", {
-        userId: Parse.User.current().id
-      });
-      setDeleteUserRes(t("account-deletion-request-sent-via-mail"));
-    } catch (err) {
-      setDeleteUserRes(err.message);
-      console.log("Err in deleteuser acc", err);
-    } finally {
-      setIsDelLoader(false);
-    }
-  };
-
-  const handleCloseDeleteModal = () => {
-    setIsdeleteModal(false);
-    setDeleteUserRes("");
-  };
-
   return (
     <React.Fragment>
       {isLoader ? (
@@ -473,55 +441,8 @@ function UserProfile() {
               >
                 {editmode ? t("cancel") : t("change-password")}
               </button>
-              <button
-                onClick={() => handleDeleteAccountBtn()}
-                className="op-link op-link-accent text-sm mx-2"
-              >
-                {t("delete-account")}
-              </button>
             </div>
           </div>
-          {isdeleteModal && (
-            <ModalUi
-              isOpen
-              title={t("delete-account")}
-              handleClose={handleCloseDeleteModal}
-            >
-              {isDelLoader ? (
-                <div className="h-[100px] flex justify-center items-center">
-                  <Loader />
-                </div>
-              ) : (
-                <>
-                  {deleteUserRes ? (
-                    <div className="h-[100px] p-[20px] flex justify-center items-center text-base-content text-sm md:text-base">
-                      {deleteUserRes}
-                    </div>
-                  ) : (
-                    <form onSubmit={(e) => handleDeleteAccount(e)}>
-                      <div className="px-6 py-3 text-base-content text-sm md:text-base">
-                        {t("delete-account-que")}
-                      </div>
-                      <div className="px-6 mb-3">
-                        <button
-                          type="submit"
-                          className="op-btn op-btn-primary w-[100px]"
-                        >
-                          {t("yes")}
-                        </button>
-                        <button
-                          className="op-btn op-btn-secondary ml-2 w-[100px]"
-                          onClick={handleCloseDeleteModal}
-                        >
-                          {t("cancel")}
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </>
-              )}
-            </ModalUi>
-          )}
           {isVerifyModal && (
             <ModalUi
               isOpen

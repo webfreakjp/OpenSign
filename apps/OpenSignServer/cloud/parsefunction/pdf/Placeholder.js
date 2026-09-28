@@ -52,10 +52,10 @@ export const Placeholder = ({
     SubFilter: subFilter,
     ByteRange: byteRange,
     Contents: placeholder,
-    Reason: PDFString.of(reason),
+    Reason: PDFHexString.fromText(reason),
     M: PDFString.fromDate(signingTime),
-    ContactInfo: PDFString.of(contactInfo),
-    Name: PDFString.of(name),
+    ContactInfo: PDFHexString.fromText(contactInfo),
+    Name: PDFHexString.fromText(name),
     Location: PDFString.of(location),
     Prop_Build: {
       Filter: { Name: 'Adobe.PPKLite' },
