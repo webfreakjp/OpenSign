@@ -1616,7 +1616,7 @@
   "show-access-code": "アクセスコードを表示",
   "hide-access-code": "アクセスコードを隠す",
   "already-copied-to-clipboard": "コピー済みです",
-  "operator-notice": "本システムは、当社がOpenSignを利用して運営しています。お問い合わせは当社の担当者までお願いいたします。",
+  "operator-notice": "本システムはOpenSignを利用して運営しています。",
   "source-code": "ソースコード",
   "source-code-description": "本システムはOpenSignの改変版を使用しています。ソースコードはGitHubから閲覧・取得できます。",
   "source-code-on-github": "GitHubでソースコードを見る",
