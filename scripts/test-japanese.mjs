@@ -125,8 +125,7 @@ test("Upstream certificate layout retains Japanese names and the full document h
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
     const pageText = content.items.map((item) => item.str || "").join("");
-    assert.ok(pageText.includes("本システムは、当社がOpenSignを利用して運営しています。"));
-    assert.ok(pageText.includes("お問い合わせは当社の担当者までお願いいたします。"));
+    assert.ok(pageText.includes("本システムはOpenSignを利用して運営しています。"));
     for (const item of content.items) {
       if (!("str" in item)) continue;
       text += item.str;

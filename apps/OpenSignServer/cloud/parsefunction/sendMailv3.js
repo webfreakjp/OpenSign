@@ -3,6 +3,7 @@ import Mailgun from 'mailgun.js';
 import { smtpenable, smtpsecure, updateMailCount } from '../../Utils.js';
 import { createTransport } from 'nodemailer';
 import { appendMailReportFooter } from './mailReportFooter.js';
+import { documentMailFrom } from './documentMailFrom.js';
 async function sendMailProvider(req) {
   const extUserId = req.params?.extUserId || '';
 
@@ -41,7 +42,7 @@ async function sendMailProvider(req) {
     const mailsender = smtpenable ? process.env.SMTP_USER_EMAIL : process.env.MAILGUN_SENDER;
     const replyto = req.params?.replyto || '';
     const messageParams = {
-      from: from + ' <' + mailsender + '>',
+      from: await documentMailFrom(from, mailsender, extUserId),
       to: req.params.recipient,
       subject: req.params.subject,
       text: req.params.text || 'mail',

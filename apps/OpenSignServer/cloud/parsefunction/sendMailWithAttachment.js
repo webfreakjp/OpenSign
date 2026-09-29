@@ -5,6 +5,7 @@ import Mailgun from 'mailgun.js';
 import { smtpenable, smtpsecure, updateMailCount } from '../../Utils.js';
 import { createTransport } from 'nodemailer';
 import { appendMailReportFooter } from './mailReportFooter.js';
+import { documentMailFrom } from './documentMailFrom.js';
 import axios from 'axios';
 
 function safeUnlink(filePath, label = 'file') {
@@ -134,7 +135,7 @@ async function sendMailProvider(params) {
           const mailsender = smtpenable ? process.env.SMTP_USER_EMAIL : process.env.MAILGUN_SENDER;
           const replyto = params?.replyto || '';
           const messageParams = {
-            from: from + ' <' + mailsender + '>',
+            from: await documentMailFrom(from, mailsender, extUserId),
             to: params.recipient,
             subject: params.subject,
             text: params.text || 'mail',
@@ -187,7 +188,7 @@ async function sendMailProvider(params) {
       const mailsender = smtpenable ? process.env.SMTP_USER_EMAIL : process.env.MAILGUN_SENDER;
       const replyto = params?.replyto || '';
       const messageParams = {
-        from: from + ' <' + mailsender + '>',
+        from: await documentMailFrom(from, mailsender, extUserId),
         to: params.recipient,
         subject: params.subject,
         text: params.text || 'mail',

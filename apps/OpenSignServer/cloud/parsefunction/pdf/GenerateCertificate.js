@@ -515,8 +515,7 @@ export default async function GenerateCertificate(docDetails) {
 
   for (const certificatePage of pdfDoc.getPages()) {
     const noticeLines = [
-      '本システムは、当社がOpenSignを利用して運営しています。',
-      'お問い合わせは当社の担当者までお願いいたします。',
+      '本システムはOpenSignを利用して運営しています。'
     ];
     noticeLines.forEach((line, index) => {
       certificatePage.drawText(line, {
